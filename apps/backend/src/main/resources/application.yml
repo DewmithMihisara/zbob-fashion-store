@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: zbob-backend
+server:
+  port: ${PORT:8080}
