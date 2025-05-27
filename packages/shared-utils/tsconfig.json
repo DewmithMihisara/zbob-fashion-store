@@ -1,0 +1,4 @@
+{
+  "extends": "@zbob/shared-config/tsconfig.base.json",
+  "include": ["src"]
+}
