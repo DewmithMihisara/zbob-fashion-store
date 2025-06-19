@@ -5,6 +5,13 @@ spring:
     default: dev
   jpa:
     open-in-view: false
+    properties:
+      hibernate:
+        default_batch_fetch_size: 50
+  data:
+    web:
+      pageable:
+        max-page-size: 100
     hibernate:
       ddl-auto: validate
   flyway:
