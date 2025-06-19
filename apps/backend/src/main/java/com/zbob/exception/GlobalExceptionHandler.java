@@ -34,6 +34,11 @@ public class GlobalExceptionHandler {
         return respond(HttpStatus.BAD_REQUEST, "BAD_REQUEST", e.getMessage());
     }
 
+    @ExceptionHandler(InvalidCredentialsException.class)
+    ResponseEntity<ApiErrorResponse> invalidCredentials(InvalidCredentialsException e) {
+        return respond(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", e.getMessage());
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     ResponseEntity<ApiErrorResponse> unreadable(HttpMessageNotReadableException e) {
         return respond(HttpStatus.BAD_REQUEST, "BAD_REQUEST", "Malformed request body");
