@@ -23,9 +23,6 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
     @Query("select distinct v.product.id from ProductVariant v where v.product.id in :productIds and v.stockQuantity > 0")
     List<Long> findProductIdsInStock(Collection<Long> productIds);
 
-    @Query("select v from ProductVariant v join fetch v.product order by v.product.name, v.size, v.color")
-    List<ProductVariant> findAllWithProduct();
-
     @Query(value = "select v from ProductVariant v join fetch v.product where v.stockQuantity <= v.lowStockThreshold",
             countQuery = "select count(v) from ProductVariant v where v.stockQuantity <= v.lowStockThreshold")
     Page<ProductVariant> findLowStock(Pageable pageable);
