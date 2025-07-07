@@ -4,6 +4,8 @@ spring:
     username: sa
     password: ""
 app:
+  storage:
+    local-dir: target/test-uploads
   jwt:
     secret: test-only-secret-test-only-secret-test-only-secret
   admin:

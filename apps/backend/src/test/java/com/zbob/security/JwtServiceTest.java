@@ -14,7 +14,7 @@ class JwtServiceTest {
     private static final String SECRET = "unit-test-secret-unit-test-secret-unit-test";
 
     private static JwtService service(String secret, Duration expiry) {
-        return new JwtService(new AppProperties(new AppProperties.Jwt(secret, expiry), null, null));
+        return new JwtService(new AppProperties(new AppProperties.Jwt(secret, expiry), null, null, null));
     }
 
     @Test
