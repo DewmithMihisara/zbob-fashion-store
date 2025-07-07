@@ -9,6 +9,7 @@ import com.zbob.modules.categories.entity.Category;
 import com.zbob.modules.categories.mapper.CategoryMapper;
 import com.zbob.modules.categories.repository.CategoryRepository;
 import com.zbob.modules.categories.service.CategoryService;
+import com.zbob.modules.products.repository.ProductRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,9 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categories;
+    private final ProductRepository products;
 
-    public CategoryServiceImpl(CategoryRepository categories) {
+    public CategoryServiceImpl(CategoryRepository categories, ProductRepository products) {
         this.categories = categories;
+        this.products = products;
     }
 
     @Override
@@ -57,7 +60,11 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public void delete(Long id) {
-        categories.delete(find(id));
+        Category category = find(id);
+        if (products.existsByCategoryId(id)) {
+            throw new ConflictException("Move or delete this category's products first");
+        }
+        categories.delete(category);
     }
 
     private Category find(Long id) {
