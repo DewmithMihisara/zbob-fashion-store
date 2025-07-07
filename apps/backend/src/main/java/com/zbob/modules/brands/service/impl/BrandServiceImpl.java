@@ -9,6 +9,7 @@ import com.zbob.modules.brands.entity.Brand;
 import com.zbob.modules.brands.mapper.BrandMapper;
 import com.zbob.modules.brands.repository.BrandRepository;
 import com.zbob.modules.brands.service.BrandService;
+import com.zbob.modules.products.repository.ProductRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,9 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class BrandServiceImpl implements BrandService {
 
     private final BrandRepository brands;
+    private final ProductRepository products;
 
-    public BrandServiceImpl(BrandRepository brands) {
+    public BrandServiceImpl(BrandRepository brands, ProductRepository products) {
         this.brands = brands;
+        this.products = products;
     }
 
     @Override
@@ -54,7 +57,11 @@ public class BrandServiceImpl implements BrandService {
     @Override
     @Transactional
     public void delete(Long id) {
-        brands.delete(find(id));
+        Brand brand = find(id);
+        if (products.existsByBrandId(id)) {
+            throw new ConflictException("Move or delete this brand's products first");
+        }
+        brands.delete(brand);
     }
 
     private Brand find(Long id) {
