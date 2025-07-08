@@ -13,6 +13,7 @@ import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -37,6 +38,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidCredentialsException.class)
     ResponseEntity<ApiErrorResponse> invalidCredentials(InvalidCredentialsException e) {
         return respond(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", e.getMessage());
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    ResponseEntity<ApiErrorResponse> tooLarge(MaxUploadSizeExceededException e) {
+        return respond(HttpStatus.CONTENT_TOO_LARGE, "FILE_TOO_LARGE", "Images can be at most 10 MB");
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
