@@ -4,6 +4,9 @@ export interface Category {
   id: number;
   name: string;
   slug: string;
+  description: string | null;
+  badge: string | null;
+  position: number;
 }
 
 export interface Brand {
@@ -26,6 +29,7 @@ export interface ProductVariant {
   color: string;
   stockQuantity: number;
   lowStockThreshold: number;
+  lowStock: boolean;
 }
 
 /** Compact shape used on product cards. */
@@ -39,17 +43,42 @@ export interface ProductSummary {
   imageUrl: string | null;
   categorySlug: string;
   inStock: boolean;
+  published: boolean;
 }
 
-/** Full shape used on the product page and the admin editor. */
-export interface Product extends Omit<ProductSummary, "imageUrl" | "categorySlug"> {
+/** Storefront product page. Reports only whether it is in stock. */
+export interface PublicProduct {
+  id: number;
+  name: string;
+  slug: string;
   description: string;
   material: string | null;
   care: string | null;
   warranty: string | null;
-  published: boolean;
+  badge: ProductBadge | null;
+  priceCents: number;
+  compareAtPriceCents: number | null;
+  inStock: boolean;
   category: Category;
-  brand: Brand | null;
   images: ProductImage[];
+}
+
+/** Full shape used by the admin product editor. */
+export interface AdminProduct extends PublicProduct {
+  published: boolean;
+  brand: Brand | null;
   variants: ProductVariant[];
+}
+
+/** One row of the admin stock table. */
+export interface InventoryRow {
+  variantId: number;
+  productId: number;
+  productName: string;
+  sku: string;
+  size: string;
+  color: string;
+  stockQuantity: number;
+  lowStockThreshold: number;
+  lowStock: boolean;
 }
