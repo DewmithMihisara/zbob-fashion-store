@@ -23,6 +23,7 @@ import com.zbob.modules.products.entity.ProductImage;
 import com.zbob.modules.products.mapper.ProductMapper;
 import com.zbob.modules.products.repository.ProductImageRepository;
 import com.zbob.modules.products.repository.ProductRepository;
+import com.zbob.modules.products.service.ProductImageService;
 import com.zbob.modules.products.service.ProductService;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,14 +44,17 @@ public class ProductServiceImpl implements ProductService {
     private final ProductVariantRepository variants;
     private final CategoryRepository categories;
     private final BrandRepository brands;
+    private final ProductImageService imageService;
 
     public ProductServiceImpl(ProductRepository products, ProductImageRepository images,
-            ProductVariantRepository variants, CategoryRepository categories, BrandRepository brands) {
+            ProductVariantRepository variants, CategoryRepository categories, BrandRepository brands,
+            ProductImageService imageService) {
         this.products = products;
         this.images = images;
         this.variants = variants;
         this.categories = categories;
         this.brands = brands;
+        this.imageService = imageService;
     }
 
     @Override
@@ -107,7 +111,9 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public void delete(Long id) {
-        products.delete(find(id));
+        Product product = find(id);
+        imageService.deleteFilesAfterCommit(id);
+        products.delete(product);
     }
 
     private Product find(Long id) {

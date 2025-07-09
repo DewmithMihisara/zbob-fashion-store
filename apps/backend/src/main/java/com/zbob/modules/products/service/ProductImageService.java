@@ -71,6 +71,14 @@ public class ProductImageService {
         AfterCommit.run(() -> deleteQuietly(key));
     }
 
+    /** Schedules removal of all of a product's stored files once its database delete has committed. */
+    public void deleteFilesAfterCommit(Long productId) {
+        List<String> keys = images.findByProductIdOrderByPositionAscIdAsc(productId).stream()
+                .map(ProductImage::getStorageKey)
+                .toList();
+        AfterCommit.run(() -> keys.forEach(this::deleteQuietly));
+    }
+
     /** Sets the display order. The list must contain exactly the product's images. */
     @Transactional
     public List<ProductImageResponse> reorder(Long productId, List<Long> imageIds) {
