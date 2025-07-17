@@ -1,17 +1,25 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
+import { Footer } from "@/components/layout/Footer";
+import { Header } from "@/components/layout/Header";
 import { inter, logoFace } from "./fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "zbob",
+  title: { default: "zbob", template: "%s | zbob" },
   description: "Modern clothing, made for everyday living.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${logoFace.variable}`}>
-      <body>{children}</body>
+      <body>
+        <AnnouncementBar />
+        <Header />
+        <main>{children}</main>
+        <Footer />
+      </body>
     </html>
   );
 }
