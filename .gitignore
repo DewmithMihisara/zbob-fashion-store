@@ -8,6 +8,7 @@ out/
 dist/
 target/
 *.tsbuildinfo
+next-env.d.ts
 
 # Environment and secrets (only .env.example is committed)
 .env
