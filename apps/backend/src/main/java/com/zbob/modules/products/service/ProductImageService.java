@@ -9,19 +9,12 @@ import com.zbob.modules.products.entity.ProductImage;
 import com.zbob.modules.products.mapper.ProductMapper;
 import com.zbob.modules.products.repository.ProductImageRepository;
 import com.zbob.modules.products.repository.ProductRepository;
-import com.zbob.modules.storage.StorageService;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.Arrays;
+import com.zbob.modules.storage.ImageUploader;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,36 +22,23 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class ProductImageService {
 
-    private static final Logger log = LoggerFactory.getLogger(ProductImageService.class);
-
     private final ProductImageRepository images;
     private final ProductRepository products;
-    private final StorageService storage;
+    private final ImageUploader uploader;
 
-    public ProductImageService(ProductImageRepository images, ProductRepository products, StorageService storage) {
+    public ProductImageService(ProductImageRepository images, ProductRepository products, ImageUploader uploader) {
         this.images = images;
         this.products = products;
-        this.storage = storage;
+        this.uploader = uploader;
     }
 
     @Transactional
     public ProductImageResponse upload(Long productId, MultipartFile file, String altText) {
         Product product = products.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", productId));
-        byte[] content = read(file);
-        ImageType type = ImageType.detect(Arrays.copyOf(content, Math.min(content.length, 16)))
-                .orElseThrow(() -> new BadRequestException("Only JPEG, PNG and WebP images are allowed"));
-
-        // The key is generated here, so nothing from the client's filename reaches the storage path.
-        String key = "products/" + productId + "/" + UUID.randomUUID() + "." + type.extension();
-        String url;
-        try {
-            url = storage.store(key, new ByteArrayInputStream(content), content.length, type.contentType());
-        } catch (IOException e) {
-            throw new UncheckedIOException("Could not store image", e);
-        }
+        ImageUploader.StoredImage stored = uploader.upload("products/" + productId, file);
         int position = images.countByProductId(productId);
-        return ProductMapper.toImage(images.save(new ProductImage(product, key, url, altText, position)));
+        return ProductMapper.toImage(images.save(new ProductImage(product, stored.key(), stored.url(), altText, position)));
     }
 
     @Transactional
@@ -68,7 +48,7 @@ public class ProductImageService {
                 .orElseThrow(() -> new ResourceNotFoundException("Image", imageId));
         images.delete(image);
         String key = image.getStorageKey();
-        AfterCommit.run(() -> deleteQuietly(key));
+        AfterCommit.run(() -> uploader.deleteQuietly(key));
     }
 
     /** Schedules removal of all of a product's stored files once its database delete has committed. */
@@ -76,7 +56,7 @@ public class ProductImageService {
         List<String> keys = images.findByProductIdOrderByPositionAscIdAsc(productId).stream()
                 .map(ProductImage::getStorageKey)
                 .toList();
-        AfterCommit.run(() -> keys.forEach(this::deleteQuietly));
+        AfterCommit.run(() -> keys.forEach(uploader::deleteQuietly));
     }
 
     /** Sets the display order. The list must contain exactly the product's images. */
@@ -92,22 +72,5 @@ public class ProductImageService {
             byId.get(imageIds.get(i)).setPosition(i);
         }
         return imageIds.stream().map(byId::get).map(ProductMapper::toImage).toList();
-    }
-
-    private static byte[] read(MultipartFile file) {
-        try {
-            return file.getBytes();
-        } catch (IOException e) {
-            throw new BadRequestException("The uploaded file could not be read");
-        }
-    }
-
-    /** Called after the database change has committed, so a failure only leaves an orphaned file. */
-    void deleteQuietly(String key) {
-        try {
-            storage.delete(key);
-        } catch (IOException | RuntimeException e) {
-            log.warn("Could not delete stored file {}", key, e);
-        }
     }
 }

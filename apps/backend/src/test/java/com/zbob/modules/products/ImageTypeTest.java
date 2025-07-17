@@ -2,7 +2,7 @@ package com.zbob.modules.products;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.zbob.modules.products.service.ImageType;
+import com.zbob.modules.storage.ImageType;
 import org.junit.jupiter.api.Test;
 
 class ImageTypeTest {
