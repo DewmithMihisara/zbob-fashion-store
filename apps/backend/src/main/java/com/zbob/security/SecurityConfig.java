@@ -40,6 +40,7 @@ public class SecurityConfig {
                                 "/api/v1/brands/**",
                                 "/api/v1/blog/**",
                                 "/api/v1/reviews/**",
+                                "/api/v1/site-media",
                                 "/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/contact").permitAll()
                         .anyRequest().authenticated())
