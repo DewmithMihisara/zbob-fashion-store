@@ -5,12 +5,16 @@ import com.zbob.exception.ConflictException;
 import com.zbob.exception.ResourceNotFoundException;
 import com.zbob.modules.categories.dto.request.CategoryRequest;
 import com.zbob.modules.categories.dto.response.CategoryResponse;
+import com.zbob.modules.categories.dto.response.CategoryWithPricesResponse;
 import com.zbob.modules.categories.entity.Category;
 import com.zbob.modules.categories.mapper.CategoryMapper;
 import com.zbob.modules.categories.repository.CategoryRepository;
 import com.zbob.modules.categories.service.CategoryService;
 import com.zbob.modules.products.repository.ProductRepository;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +33,18 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional(readOnly = true)
     public List<CategoryResponse> list() {
         return categories.findAllByOrderByPositionAscNameAsc().stream().map(CategoryMapper::toResponse).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CategoryWithPricesResponse> listWithPrices() {
+        Map<Long, ProductRepository.CategoryPriceRange> ranges = products.findPublishedPriceRanges().stream()
+                .collect(Collectors.toMap(ProductRepository.CategoryPriceRange::getCategoryId, Function.identity()));
+        return categories.findAllByOrderByPositionAscNameAsc().stream().map(c -> {
+            var range = ranges.get(c.getId());
+            return new CategoryWithPricesResponse(c.getId(), c.getName(), c.getSlug(), c.getDescription(), c.getBadge(),
+                    range == null ? null : range.getMinCents(), range == null ? null : range.getMaxCents());
+        }).toList();
     }
 
     @Override
