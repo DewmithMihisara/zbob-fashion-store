@@ -69,6 +69,21 @@ class ProductApiTest {
     }
 
     @Test
+    void categoryPriceRangeIgnoresDrafts() throws Exception {
+        Product cheap = saveProduct("Cheap Tee", true, null);
+        cheap.setPriceCents(1000);
+        Product dear = saveProduct("Dear Coat", true, null);
+        dear.setPriceCents(9000);
+        Product draft = saveProduct("Draft Coat", false, null);
+        draft.setPriceCents(99000);
+        products.flush();
+
+        mvc.perform(get("/api/v1/categories/with-prices"))
+                .andExpect(jsonPath("$[0].minPriceCents").value(1000))
+                .andExpect(jsonPath("$[0].maxPriceCents").value(9000));
+    }
+
+    @Test
     void publicListHidesUnpublishedProducts() throws Exception {
         saveProduct("Visible Tee", true, null);
         saveProduct("Draft Tee", false, null);
