@@ -42,7 +42,7 @@ public class SecurityConfig {
                                 "/api/v1/reviews/**",
                                 "/api/v1/site-media",
                                 "/uploads/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/contact").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/contact", "/api/v1/newsletter").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
                 .build();
