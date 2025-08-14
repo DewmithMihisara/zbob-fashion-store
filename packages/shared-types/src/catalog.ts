@@ -9,6 +9,16 @@ export interface Category {
   position: number;
 }
 
+export interface CategoryWithPrices {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  badge: string | null;
+  minPriceCents: number | null;
+  maxPriceCents: number | null;
+}
+
 export interface Brand {
   id: number;
   name: string;
@@ -41,6 +51,7 @@ export interface ProductSummary {
   priceCents: number;
   compareAtPriceCents: number | null;
   imageUrl: string | null;
+  imageUrls: string[];
   categorySlug: string;
   inStock: boolean;
   published: boolean;
