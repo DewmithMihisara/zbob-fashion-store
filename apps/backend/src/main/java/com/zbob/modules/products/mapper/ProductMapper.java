@@ -17,9 +17,11 @@ public final class ProductMapper {
     private ProductMapper() {
     }
 
-    public static ProductSummaryResponse toSummary(Product p, String imageUrl, boolean inStock) {
+    /** The card shows the first image large and up to two swatches for quick switching. */
+    public static ProductSummaryResponse toSummary(Product p, List<String> imageUrls, boolean inStock) {
         return new ProductSummaryResponse(p.getId(), p.getName(), p.getSlug(), p.getBadge(), p.getPriceCents(),
-                p.getCompareAtPriceCents(), imageUrl, p.getCategory().getSlug(), inStock, p.isPublished());
+                p.getCompareAtPriceCents(), imageUrls.isEmpty() ? null : imageUrls.get(0),
+                imageUrls.stream().limit(2).toList(), p.getCategory().getSlug(), inStock, p.isPublished());
     }
 
     public static ProductResponse toResponse(Product p, List<ProductImage> images, List<ProductVariant> variants) {

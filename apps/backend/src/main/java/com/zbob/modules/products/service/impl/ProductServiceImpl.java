@@ -25,6 +25,7 @@ import com.zbob.modules.products.repository.ProductImageRepository;
 import com.zbob.modules.products.repository.ProductRepository;
 import com.zbob.modules.products.service.ProductImageService;
 import com.zbob.modules.products.service.ProductService;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -144,14 +145,15 @@ public class ProductServiceImpl implements ProductService {
                 variants.findByProductIdOrderBySizeAscColorAsc(product.getId()));
     }
 
-    /** Loads first images and stock flags in one query each, so a page of cards is not N+1. */
+    /** Loads images and stock flags in one query each, so a page of cards is not N+1. */
     private PageResponse<ProductSummaryResponse> summaries(Page<Product> page) {
         List<Long> ids = page.getContent().stream().map(Product::getId).toList();
-        Map<Long, String> firstImage = new HashMap<>();
+        Map<Long, List<String>> urls = new HashMap<>();
         for (ProductImage image : images.findByProductIdInOrderByPositionAscIdAsc(ids)) {
-            firstImage.putIfAbsent(image.getProduct().getId(), image.getUrl());
+            urls.computeIfAbsent(image.getProduct().getId(), id -> new ArrayList<>()).add(image.getUrl());
         }
         Set<Long> inStock = new HashSet<>(variants.findProductIdsInStock(ids));
-        return PageResponse.of(page, p -> ProductMapper.toSummary(p, firstImage.get(p.getId()), inStock.contains(p.getId())));
+        return PageResponse.of(page, p -> ProductMapper.toSummary(
+                p, urls.getOrDefault(p.getId(), List.of()), inStock.contains(p.getId())));
     }
 }
