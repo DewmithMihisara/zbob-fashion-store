@@ -30,7 +30,7 @@ export function HomeHero({ photos }: { photos: (string | null)[] }) {
       ))}
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/80" />
 
-      <div className="relative flex flex-1 flex-col items-center px-5 pt-[150px] text-center">
+      <div className="relative flex flex-1 flex-col items-center px-5 pt-[136px] text-center">
         <HeroEyebrow lead="New">The winter layers edit</HeroEyebrow>
         <h1 className="mt-5 text-[42px] leading-[1.13] font-medium tracking-tight-3 tablet:text-[62px]">
           Clothes that keep
@@ -62,7 +62,7 @@ export function HomeHero({ photos }: { photos: (string | null)[] }) {
               index === active ? "h-[60px] w-[80px] border border-paper tablet:h-[105px] tablet:w-[140px]" : "h-10 w-10 opacity-90 tablet:h-[70px] tablet:w-[88px]"
             }`}
           >
-            {photo ? <Image src={photo} alt="" fill sizes="140px" className="object-cover" /> : <ImagePlaceholder tone="dark" className="[&>span]:hidden" />}
+            {photo ? <Image src={photo} alt="" fill sizes="140px" className="object-cover" /> : <ImagePlaceholder tone="dark" />}
             {index === active && (
               <span className="absolute inset-x-0 bottom-2 text-center text-[13px] font-medium">{SLIDE_LABELS[index]}</span>
             )}
