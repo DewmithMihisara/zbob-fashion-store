@@ -61,7 +61,7 @@ export function Footer() {
             })}
           </FooterColumn>
         </div>
-        <p aria-hidden="true" className="mt-12 font-logo text-[33vw] leading-[0.85] uppercase select-none desktop:text-[430px]">
+        <p aria-hidden="true" className="mt-12 text-center font-logo text-[40vw] leading-[0.82] uppercase select-none desktop:text-[550px]">
           zbob
         </p>
       </div>
