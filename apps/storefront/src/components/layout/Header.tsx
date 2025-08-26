@@ -27,7 +27,7 @@ export function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-40 -mb-[71px] h-[71px] transition-colors duration-300 ${
+      className={`h-[71px] transition-colors duration-300 ${
         overHero ? "bg-transparent text-paper" : "bg-canvas text-ink"
       }`}
     >

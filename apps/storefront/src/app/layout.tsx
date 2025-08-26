@@ -15,8 +15,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${logoFace.variable}`}>
       <body>
-        <AnnouncementBar />
-        <Header />
+        <div className="sticky top-0 z-40 -mb-[71px]">
+          <AnnouncementBar />
+          <Header />
+        </div>
         <main>{children}</main>
         <Footer />
       </body>
