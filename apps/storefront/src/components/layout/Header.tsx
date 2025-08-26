@@ -31,16 +31,16 @@ export function Header() {
         overHero ? "bg-transparent text-paper" : "bg-canvas text-ink"
       }`}
     >
-      <div className="mx-auto flex h-full max-w-[1150px] items-center justify-between px-5 desktop:px-0">
-        <Wordmark />
+      <div className="mx-auto grid h-full max-w-[1150px] grid-cols-[1fr_auto] items-center px-5 tablet:grid-cols-[1fr_auto_1fr] desktop:px-0">
+        <Wordmark className="justify-self-start" />
         <nav aria-label="Main" className="hidden items-center gap-6 tablet:flex">
           {navLinks.map((link) => (
-            <Link key={link.href} href={link.href} className="text-[16px] font-medium tracking-tight-2 transition-opacity hover:opacity-60">
+            <Link key={link.href} href={link.href} className="text-[16px] font-[450] tracking-tight-1 transition-opacity hover:opacity-60">
               {link.label}
             </Link>
           ))}
         </nav>
-        <div className="flex items-center gap-[10px]">
+        <div className="flex items-center gap-[10px] justify-self-end">
           <Link
             href="/shop"
             aria-label="Search products"
