@@ -23,7 +23,8 @@ export function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const overHero = HERO_PAGES.has(pathname) && !scrolled && !menuOpen;
+  const hasHero = HERO_PAGES.has(pathname) || pathname.startsWith("/blog/");
+  const overHero = hasHero && !scrolled && !menuOpen;
 
   return (
     <header
