@@ -2,6 +2,7 @@ import Link from "next/link";
 import { LinkButton } from "@/components/ui/Button";
 import { MailIcon, PhoneIcon, PinIcon } from "@/components/ui/icons";
 import { navLinks, site, socialLinks } from "@/lib/site";
+import { NewsletterForm } from "./NewsletterForm";
 import { Wordmark } from "./Wordmark";
 
 const quickLinks = [...navLinks, { href: "/#reviews", label: "Reviews" }, { href: "/#styles", label: "Styles" }];
@@ -16,7 +17,15 @@ export function Footer() {
   return (
     <footer className="bg-ink text-paper">
       <div className="mx-auto max-w-[1190px] px-5 pt-16 pb-6 desktop:px-0">
-        <div className="grid gap-12 tablet:grid-cols-[1fr_auto_auto_auto] tablet:gap-16">
+        <div className="flex flex-col gap-6 border-b border-paper/15 pb-12 tablet:flex-row tablet:items-center tablet:justify-between">
+          <h2 className="text-[32px] leading-[44px] font-medium tracking-tight-3 tablet:text-[36px]">
+            Hear about new
+            <br />
+            pieces first
+          </h2>
+          <NewsletterForm />
+        </div>
+        <div className="mt-14 grid gap-12 tablet:grid-cols-[1fr_auto_auto_auto] tablet:gap-16">
           <div>
             <Wordmark className="text-[26px]" />
             <p className="mt-5 max-w-[320px] text-[16px] leading-[24px] font-medium text-paper/70">{site.tagline}</p>
