@@ -35,7 +35,7 @@ export default async function ProductPage({ params }: Props) {
     <>
       <section className="pt-[98px]">
         <Container>
-          <div className="grid gap-[34px] tablet:grid-cols-2">
+          <div className="grid gap-[34px] tablet:grid-cols-[575fr_541fr]">
             <ProductGallery images={product.images} name={product.name} badge={product.badge} />
             <div className="flex flex-col pr-0 desktop:pr-[34px]">
               <p className="mt-[34px] flex items-center gap-3 text-[17px] font-medium">
