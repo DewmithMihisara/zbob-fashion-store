@@ -15,7 +15,7 @@ const contacts = [
 
 export function Footer() {
   return (
-    <footer className="bg-ink text-paper">
+    <footer className="overflow-hidden bg-ink text-paper">
       <div className="mx-auto max-w-[1190px] px-5 pt-16 pb-6 desktop:px-0">
         <div className="flex flex-col gap-6 border-b border-paper/15 pb-12 tablet:flex-row tablet:items-center tablet:justify-between">
           <h2 className="text-[32px] leading-[44px] font-medium tracking-tight-3 tablet:text-[36px]">
