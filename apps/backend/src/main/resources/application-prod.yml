@@ -3,3 +3,8 @@ spring:
     url: jdbc:mysql://${DB_HOST}:${DB_PORT:3306}/${DB_NAME}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
