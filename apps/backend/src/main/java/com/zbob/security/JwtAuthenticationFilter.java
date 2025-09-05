@@ -1,5 +1,7 @@
 package com.zbob.security;
 
+import com.zbob.modules.users.entity.User;
+import com.zbob.modules.users.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,9 +20,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String PREFIX = "Bearer ";
 
     private final JwtService jwtService;
+    private final UserRepository users;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
+    public JwtAuthenticationFilter(JwtService jwtService, UserRepository users) {
         this.jwtService = jwtService;
+        this.users = users;
     }
 
     @Override
@@ -28,11 +32,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (header != null && header.startsWith(PREFIX)) {
-            jwtService.verify(header.substring(PREFIX.length())).ifPresent(user -> {
-                var authority = new SimpleGrantedAuthority("ROLE_" + user.role().name());
-                SecurityContextHolder.getContext().setAuthentication(
-                        new UsernamePasswordAuthenticationToken(user, null, List.of(authority)));
-            });
+            // The role is read from the database, so demoting or disabling someone applies immediately.
+            jwtService.verify(header.substring(PREFIX.length()))
+                    .flatMap(token -> users.findById(token.id()))
+                    .filter(User::isActive)
+                    .ifPresent(user -> {
+                        var principal = new AuthenticatedUser(user.getId(), user.getRole());
+                        var authority = new SimpleGrantedAuthority("ROLE_" + user.getRole().name());
+                        SecurityContextHolder.getContext().setAuthentication(
+                                new UsernamePasswordAuthenticationToken(principal, null, List.of(authority)));
+                    });
         }
         chain.doFilter(request, response);
     }

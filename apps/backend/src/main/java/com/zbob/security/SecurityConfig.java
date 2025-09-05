@@ -1,6 +1,7 @@
 package com.zbob.security;
 
 import com.zbob.config.AppProperties;
+import com.zbob.modules.users.repository.UserRepository;
 import jakarta.servlet.DispatcherType;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +24,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     @Bean
-    SecurityFilterChain filterChain(HttpSecurity http, JwtService jwtService) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http, JwtService jwtService, UserRepository users) throws Exception {
         var errors = new JsonSecurityErrorHandler();
         return http
                 .csrf(AbstractHttpConfigurer::disable) // bearer tokens, no cookies
@@ -46,7 +47,7 @@ public class SecurityConfig {
                                 "/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/contact", "/api/v1/newsletter").permitAll()
                         .anyRequest().authenticated())
-                .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilter(jwtService, users), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
