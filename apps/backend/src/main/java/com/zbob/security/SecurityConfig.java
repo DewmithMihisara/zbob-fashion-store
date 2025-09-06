@@ -44,6 +44,7 @@ public class SecurityConfig {
                                 "/api/v1/blog/**",
                                 "/api/v1/reviews/**",
                                 "/api/v1/site-media",
+                                "/api/v1/shipping-methods",
                                 "/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/contact", "/api/v1/newsletter").permitAll()
                         .anyRequest().authenticated())
