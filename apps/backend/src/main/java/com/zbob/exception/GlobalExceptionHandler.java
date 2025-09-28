@@ -40,6 +40,11 @@ public class GlobalExceptionHandler {
         return respond(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", e.getMessage());
     }
 
+    @ExceptionHandler(PaymentsNotConfiguredException.class)
+    ResponseEntity<ApiErrorResponse> paymentsNotConfigured(PaymentsNotConfiguredException e) {
+        return respond(HttpStatus.NOT_IMPLEMENTED, "PAYMENTS_NOT_CONFIGURED", e.getMessage());
+    }
+
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     ResponseEntity<ApiErrorResponse> tooLarge(MaxUploadSizeExceededException e) {
         return respond(HttpStatus.CONTENT_TOO_LARGE, "FILE_TOO_LARGE", "Images can be at most 10 MB");
