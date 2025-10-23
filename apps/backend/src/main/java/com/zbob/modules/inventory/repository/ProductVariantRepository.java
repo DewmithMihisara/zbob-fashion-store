@@ -22,6 +22,11 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
     @Query("update ProductVariant v set v.stockQuantity = v.stockQuantity + :quantity where v.id = :id")
     int restoreStock(Long id, int quantity);
 
+    @Query("select count(v) from ProductVariant v where v.stockQuantity <= v.lowStockThreshold")
+    long countLowStock();
+
+    long countByStockQuantity(int stockQuantity);
+
     boolean existsBySku(String sku);
 
     boolean existsBySkuAndIdNot(String sku, Long id);

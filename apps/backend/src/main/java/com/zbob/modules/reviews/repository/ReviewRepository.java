@@ -16,4 +16,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     double averageApprovedRating();
 
     long countByApprovedTrue();
+
+    long countByApprovedFalse();
 }

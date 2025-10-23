@@ -19,6 +19,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     boolean existsByBrandId(Long brandId);
 
+    long countByPublishedTrue();
+
     @Query("""
             select p.category.id as categoryId, min(p.priceCents) as minCents, max(p.priceCents) as maxCents
             from Product p where p.published = true group by p.category.id""")
