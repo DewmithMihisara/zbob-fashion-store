@@ -11,11 +11,9 @@ import com.zbob.modules.users.entity.User;
 import com.zbob.modules.users.repository.UserRepository;
 import com.zbob.security.JwtService;
 import org.springframework.boot.test.context.TestComponent;
-import org.springframework.context.annotation.Import;
 
 /** Creates the rows that cart and order tests need. */
 @TestComponent
-@Import(TestData.class)
 public class TestData {
 
     private final CategoryRepository categories;
