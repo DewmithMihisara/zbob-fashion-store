@@ -15,10 +15,21 @@ export const PNG = Buffer.from(
 
 export async function signIn(page: Page): Promise<void> {
   await page.goto(`${ADMIN}/login`);
-  await page.getByLabel("Email").fill(ADMIN_EMAIL);
-  await page.getByLabel("Password").fill(ADMIN_PASSWORD);
-  await page.getByRole("button", { name: "Sign in" }).click();
-  await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible();
+  // The session lasts for the tab, so a second call lands straight on the dashboard.
+  const signInButton = page.getByRole("button", { name: "Sign in" });
+  const dashboard = page.getByRole("heading", { name: "Dashboard" });
+  await expect(signInButton.or(dashboard)).toBeVisible();
+  if (await signInButton.isVisible()) {
+    await page.getByLabel("Email").fill(ADMIN_EMAIL);
+    await page.getByLabel("Password").fill(ADMIN_PASSWORD);
+    await signInButton.click();
+  }
+  await expect(dashboard).toBeVisible();
+}
+
+/** The page's own error, not the hidden alert Next.js uses to announce route changes. */
+export function errorAlert(page: Page) {
+  return page.locator("main p[role=alert]");
 }
 
 /** Opens a product in the admin editor through the products list. */
