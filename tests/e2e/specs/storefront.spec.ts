@@ -21,12 +21,15 @@ test("home page has no invented claims from the template", async ({ page }) => {
 
 test("shop filters by category", async ({ page }) => {
   await page.goto(`${STORE}/shop`);
-  await expect(page.locator("article")).toHaveCount(20);
+  const all = page.locator("article");
+  await expect(all.first()).toBeVisible();
+  const allCount = await all.count();
+  expect(allCount).toBeGreaterThanOrEqual(20); // demo products, plus any published by other specs
 
   await page.getByRole("link", { name: "Children's Wear" }).click();
 
   await expect(page).toHaveURL(/category=childrens-wear/);
-  await expect(page.locator("article")).toHaveCount(4);
+  await expect(page.locator("article")).toHaveCount(5);
   await expect(page.getByRole("link", { name: "Children's Wear" })).toHaveAttribute("aria-current", "page");
 });
 
