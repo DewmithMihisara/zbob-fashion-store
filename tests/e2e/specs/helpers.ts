@@ -14,8 +14,9 @@ export const PNG = Buffer.from(
 );
 
 export async function signIn(page: Page): Promise<void> {
-  await page.goto(`${ADMIN}/login`);
-  // The session lasts for the tab, so a second call lands straight on the dashboard.
+  // The session lasts for the tab. Dashboard pages render nothing until they know whether it exists,
+  // so whichever of these appears first is the true state.
+  await page.goto(`${ADMIN}/dashboard`);
   const signInButton = page.getByRole("button", { name: "Sign in" });
   const dashboard = page.getByRole("heading", { name: "Dashboard" });
   await expect(signInButton.or(dashboard)).toBeVisible();
