@@ -6,7 +6,7 @@ test("a contact message reaches the dashboard", async ({ page }) => {
 
   await page.goto(`${STORE}/contact`);
   await page.getByLabel("Full name").fill("Sam Tester");
-  await page.getByLabel("Email").fill("sam@example.com");
+  await page.getByLabel("Email", { exact: true }).fill("sam@example.com");
   await page.getByLabel("Subject").fill(subject);
   await page.getByLabel("Message").fill("Does this run large?");
   await page.getByRole("button", { name: "Send Message" }).click();
