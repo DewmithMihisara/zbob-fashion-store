@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { ADMIN, ADMIN_EMAIL, API, signIn } from "./helpers";
+import { ADMIN, ADMIN_EMAIL, API, errorAlert, signIn } from "./helpers";
 
 test("dashboard pages send signed out visitors to login", async ({ page }) => {
   await page.goto(`${ADMIN}/products`);
@@ -13,7 +13,7 @@ test("wrong password shows an error and stays signed out", async ({ page }) => {
   await page.getByLabel("Password").fill("definitely-wrong");
   await page.getByRole("button", { name: "Sign in" }).click();
 
-  await expect(page.getByRole("alert")).toHaveText("Invalid email or password");
+  await expect(errorAlert(page)).toHaveText("Invalid email or password");
   await expect(page).toHaveURL(/\/login$/);
 });
 

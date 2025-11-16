@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { ADMIN, openProduct, PNG, signIn, STORE } from "./helpers";
+import { ADMIN, errorAlert, openProduct, PNG, signIn, STORE } from "./helpers";
 
 const PRODUCT = "Canvas Chore Jacket";
 const SLUG = "canvas-chore-jacket";
@@ -36,7 +36,7 @@ test("a file that is not an image is refused", async ({ page }) => {
 
   await page.getByLabel("Choose image file").setInputFiles({ name: "notes.txt", mimeType: "text/plain", buffer: Buffer.from("hello") });
 
-  await expect(page.getByRole("alert")).toContainText("only JPEG, PNG and WebP");
+  await expect(errorAlert(page)).toContainText("only JPEG, PNG and WebP");
 });
 
 test("a renamed non-image is refused by the api", async ({ page }) => {
@@ -45,7 +45,7 @@ test("a renamed non-image is refused by the api", async ({ page }) => {
 
   await page.getByLabel("Choose image file").setInputFiles({ name: "fake.png", mimeType: "image/png", buffer: Buffer.from("<script>alert(1)</script>") });
 
-  await expect(page.getByRole("alert")).toContainText("Only JPEG, PNG and WebP images are allowed");
+  await expect(errorAlert(page)).toContainText("Only JPEG, PNG and WebP images are allowed");
 });
 
 test("site photo slots update the storefront", async ({ page }) => {
@@ -60,11 +60,6 @@ test("site photo slots update the storefront", async ({ page }) => {
   await expect(page.locator("section").first().locator("img")).toBeVisible();
 
   await page.goto(`${ADMIN}/site-photos`);
-  // Session storage survives the visit to the storefront only when the origin matches, so sign in again if asked.
-  if (page.url().endsWith("/login")) {
-    await signIn(page);
-    await page.goto(`${ADMIN}/site-photos`);
-  }
   await page.getByRole("listitem").filter({ hasText: "Shop page hero" }).getByRole("button", { name: "Remove" }).click();
   await page.getByRole("button", { name: "Yes", exact: true }).click();
   await expect(page.getByRole("listitem").filter({ hasText: "Shop page hero" }).getByText("Placeholder showing")).toBeVisible();
