@@ -43,7 +43,9 @@ test("stock page edits, filters low stock and flags it on the dashboard", async 
 
   await page.goto(`${ADMIN}/inventory`);
   const row = page.getByRole("row").filter({ hasText: "Harbour Camp Shirt" }).first();
-  await row.getByRole("spinbutton").fill("1");
+  // Both values are low stock; choosing the other one means a rerun still has a change to save.
+  const input = row.getByRole("spinbutton");
+  await input.fill((await input.inputValue()) === "1" ? "2" : "1");
   await row.getByRole("button", { name: "Save" }).click();
   await expect(row.getByText("Low stock")).toBeVisible();
 
