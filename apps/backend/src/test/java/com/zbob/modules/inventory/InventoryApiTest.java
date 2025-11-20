@@ -117,6 +117,16 @@ class InventoryApiTest {
     }
 
     @Test
+    void stockListIsSortedByProductThenSize() throws Exception {
+        variants.save(new ProductVariant(product, "BT-S", "S", "Black", 9));
+        variants.save(new ProductVariant(product, "BT-L", "L", "Black", 9));
+
+        mvc.perform(get("/api/v1/admin/inventory"))
+                .andExpect(jsonPath("$.content[0].size").value("L"))
+                .andExpect(jsonPath("$.content[1].size").value("S"));
+    }
+
+    @Test
     void deletesVariant() throws Exception {
         ProductVariant variant = variants.save(new ProductVariant(product, "BT-M", "M", "Black", 1));
 
