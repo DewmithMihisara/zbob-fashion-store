@@ -49,9 +49,11 @@ export function Header() {
           >
             <SearchIcon />
           </Link>
-          <LinkButton href="/shop" variant={overHero ? "light" : "dark"} className="hidden tablet:inline-flex">
-            Shop all items
-          </LinkButton>
+          <span className="hidden tablet:inline">
+            <LinkButton href="/shop" variant={overHero ? "light" : "dark"}>
+              Shop all items
+            </LinkButton>
+          </span>
           <button
             type="button"
             aria-label={menuOpen ? "Close menu" : "Open menu"}
