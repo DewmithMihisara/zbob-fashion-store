@@ -74,6 +74,15 @@ test("about page figures come from the store", async ({ page }) => {
   await expect(page.getByText("10M+")).toHaveCount(0);
 });
 
+test("mobile header shows only search and menu", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(STORE);
+
+  await expect(page.getByRole("banner").getByRole("link", { name: "Shop all items" })).toBeHidden();
+  await expect(page.getByRole("link", { name: "Search products" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Open menu" })).toBeVisible();
+});
+
 test("mobile menu opens and navigates", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(STORE);
