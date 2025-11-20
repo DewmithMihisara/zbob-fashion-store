@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
+import path from "node:path";
 
 const nextConfig: NextConfig = {
   agentRules: false,
+  output: "standalone",
+  outputFileTracingRoot: path.join(__dirname, "../.."),
   transpilePackages: ["@zbob/shared-types", "@zbob/shared-utils"],
   images: {
     remotePatterns: [
