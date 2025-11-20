@@ -35,7 +35,7 @@ public class AdminInventoryController {
     @GetMapping("/inventory")
     PageResponse<InventoryRowResponse> list(
             @RequestParam(defaultValue = "false") boolean lowStockOnly,
-            @PageableDefault(size = 50) Pageable pageable) {
+            @PageableDefault(size = 50, sort = {"product.name", "size", "color"}) Pageable pageable) {
         return inventory.list(lowStockOnly, pageable);
     }
 
