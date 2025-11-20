@@ -22,7 +22,6 @@ public final class SiteMediaSlots {
         slots.put("home-story", "Home brand story");
         slots.put("shop-hero", "Shop page hero");
         slots.put("about-hero", "About page hero");
-        slots.put("about-story", "About page story");
         slots.put("blog-hero", "Blog page hero");
         slots.put("contact-hero", "Contact page hero");
         slots.put("contact-side", "Contact form photo");
