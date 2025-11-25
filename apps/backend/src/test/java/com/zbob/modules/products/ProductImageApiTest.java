@@ -82,6 +82,22 @@ class ProductImageApiTest {
     }
 
     @Test
+    void sixthPhotoIsRefusedUntilOneIsDeleted() throws Exception {
+        for (int i = 0; i < 5; i++) {
+            mvc.perform(multipart(url()).file(file("tee.png", "image/png", PNG))).andExpect(status().isCreated());
+        }
+
+        mvc.perform(multipart(url()).file(file("tee.png", "image/png", PNG)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("A product can have at most 5 photos. Delete one first."));
+
+        Long firstId = images.findByProductIdOrderByPositionAscIdAsc(product.getId()).get(0).getId();
+        mvc.perform(delete(url() + "/" + firstId)).andExpect(status().isNoContent());
+        images.flush();
+        mvc.perform(multipart(url()).file(file("tee.png", "image/png", PNG))).andExpect(status().isCreated());
+    }
+
+    @Test
     void contentIsCheckedNotTheDeclaredType() throws Exception {
         byte[] script = "<script>alert(1)</script>".getBytes(StandardCharsets.UTF_8);
 
