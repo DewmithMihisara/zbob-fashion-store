@@ -2,6 +2,7 @@ package com.zbob.modules.products.service;
 
 import com.zbob.common.util.AfterCommit;
 import com.zbob.exception.BadRequestException;
+import com.zbob.exception.ConflictException;
 import com.zbob.exception.ResourceNotFoundException;
 import com.zbob.modules.products.dto.response.ProductImageResponse;
 import com.zbob.modules.products.entity.Product;
@@ -22,6 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class ProductImageService {
 
+    public static final int MAX_IMAGES_PER_PRODUCT = 5;
+
     private final ProductImageRepository images;
     private final ProductRepository products;
     private final ImageUploader uploader;
@@ -34,10 +37,13 @@ public class ProductImageService {
 
     @Transactional
     public ProductImageResponse upload(Long productId, MultipartFile file, String altText) {
-        Product product = products.findById(productId)
+        Product product = products.findByIdForUpdate(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", productId));
-        ImageUploader.StoredImage stored = uploader.upload("products/" + productId, file);
         int position = images.countByProductId(productId);
+        if (position >= MAX_IMAGES_PER_PRODUCT) {
+            throw new ConflictException("A product can have at most " + MAX_IMAGES_PER_PRODUCT + " photos. Delete one first.");
+        }
+        ImageUploader.StoredImage stored = uploader.upload("products/" + productId, file);
         return ProductMapper.toImage(images.save(new ProductImage(product, stored.key(), stored.url(), altText, position)));
     }
 
