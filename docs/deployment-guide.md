@@ -26,6 +26,28 @@ The workflows and Dockerfiles in this repo have not been run against real cloud 
 
 Cloud Run's disk does not persist, so `STORAGE_PROVIDER=local` must not be used there or uploaded photos will vanish.
 
+## Connecting the Google bucket
+
+The code for Google Cloud Storage is in place but has not run against a real bucket yet. Development keeps photos on disk until you switch it on.
+
+1. Create the bucket, for example `zbob-photos`:
+
+   ```sh
+   gcloud storage buckets create gs://zbob-photos --location=asia-south1 --uniform-bucket-level-access
+   ```
+
+2. Let the website read photos:
+
+   ```sh
+   gcloud storage buckets add-iam-policy-binding gs://zbob-photos --member=allUsers --role=roles/storage.objectViewer
+   ```
+
+3. Let the API write photos by granting its service account `roles/storage.objectAdmin` on the bucket.
+4. Set `STORAGE_PROVIDER=gcs` and `STORAGE_BUCKET=zbob-photos`. To try it from your own computer, also set `GOOGLE_APPLICATION_CREDENTIALS` to a service account key file, and never commit that file.
+5. Upload a photo in the dashboard and check that it appears on the storefront.
+
+The API saves each photo's public `https://storage.googleapis.com/...` URL in the database. Photos uploaded earlier to local disk keep their old URLs, so upload those again after switching.
+
 ## Frontend environment
 
 | App | Variable | Notes |
