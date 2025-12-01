@@ -1,5 +1,6 @@
 package com.zbob.exception;
 
+import java.io.UncheckedIOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -38,6 +39,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidCredentialsException.class)
     ResponseEntity<ApiErrorResponse> invalidCredentials(InvalidCredentialsException e) {
         return respond(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", e.getMessage());
+    }
+
+    @ExceptionHandler(UncheckedIOException.class)
+    ResponseEntity<ApiErrorResponse> storageFailed(UncheckedIOException e) {
+        log.error("Image storage failed", e);
+        return respond(HttpStatus.SERVICE_UNAVAILABLE, "STORAGE_UNAVAILABLE", "The photo could not be saved. Please try again.");
     }
 
     @ExceptionHandler(PaymentsNotConfiguredException.class)
