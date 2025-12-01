@@ -3,6 +3,9 @@ spring:
     url: jdbc:mysql://${DB_HOST}:${DB_PORT:3306}/${DB_NAME}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+app:
+  storage:
+    provider: ${STORAGE_PROVIDER:gcs}
 springdoc:
   api-docs:
     enabled: false
