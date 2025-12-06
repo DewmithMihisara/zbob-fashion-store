@@ -61,6 +61,15 @@ public class StaffService {
         return UserMapper.toResponse(user);
     }
 
+    /** Nobody can delete their own account, which also means the last admin can never be removed. */
+    @Transactional
+    public void delete(Long id, Long actingUserId) {
+        if (id.equals(actingUserId)) {
+            throw new ConflictException("You can not delete your own account");
+        }
+        users.delete(find(id));
+    }
+
     @Transactional
     public void resetPassword(Long id, String password) {
         find(id).setPasswordHash(encoder.encode(password));
