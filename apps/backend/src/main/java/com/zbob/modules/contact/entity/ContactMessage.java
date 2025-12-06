@@ -50,6 +50,13 @@ public class ContactMessage extends BaseEntity {
         return message;
     }
 
+    public void setDetails(String name, String email, String subject, String message) {
+        this.name = name;
+        this.email = email;
+        this.subject = subject;
+        this.message = message;
+    }
+
     public boolean isHandled() {
         return handled;
     }

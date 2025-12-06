@@ -2,6 +2,7 @@ package com.zbob.modules.contact.service;
 
 import com.zbob.common.dto.PageResponse;
 import com.zbob.exception.ResourceNotFoundException;
+import com.zbob.modules.contact.dto.AdminMessageRequest;
 import com.zbob.modules.contact.dto.ContactMessageResponse;
 import com.zbob.modules.contact.dto.ContactRequest;
 import com.zbob.modules.contact.dto.NewsletterRequest;
@@ -48,6 +49,21 @@ public class ContactService {
     @Transactional(readOnly = true)
     public PageResponse<ContactMessageResponse> listMessages(Pageable pageable) {
         return PageResponse.of(messages.findAll(pageable), ContactService::toResponse);
+    }
+
+    @Transactional
+    public ContactMessageResponse createMessage(AdminMessageRequest request) {
+        ContactMessage message = new ContactMessage(request.name().trim(), request.email().trim(), request.subject(), request.message());
+        message.setHandled(request.handled());
+        return toResponse(messages.save(message));
+    }
+
+    @Transactional
+    public ContactMessageResponse updateMessage(Long id, AdminMessageRequest request) {
+        ContactMessage message = find(id);
+        message.setDetails(request.name().trim(), request.email().trim(), request.subject(), request.message());
+        message.setHandled(request.handled());
+        return toResponse(message);
     }
 
     @Transactional
