@@ -1,6 +1,7 @@
 package com.zbob.modules.orders.controller;
 
 import com.zbob.common.dto.PageResponse;
+import com.zbob.modules.orders.dto.OrderItemResponse;
 import com.zbob.modules.orders.dto.OrderResponse;
 import com.zbob.modules.orders.dto.OrderSummaryResponse;
 import com.zbob.modules.orders.dto.UpdateOrderStatusRequest;
@@ -38,6 +39,11 @@ public class AdminOrderController {
     @GetMapping("/{id}")
     OrderResponse get(@PathVariable Long id) {
         return orders.get(id);
+    }
+
+    @GetMapping("/{id}/items")
+    PageResponse<OrderItemResponse> items(@PathVariable Long id, @PageableDefault(size = 10, sort = "id") Pageable pageable) {
+        return orders.listItems(id, pageable);
     }
 
     @PatchMapping("/{id}/status")

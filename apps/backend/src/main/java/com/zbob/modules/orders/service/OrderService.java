@@ -144,6 +144,17 @@ public class OrderService {
         return toResponse(order);
     }
 
+    @Transactional(readOnly = true)
+    public PageResponse<OrderItemResponse> listItems(Long orderId, Pageable pageable) {
+        find(orderId);
+        return PageResponse.of(orderItems.findByOrderId(orderId, pageable), OrderService::toItem);
+    }
+
+    private static OrderItemResponse toItem(OrderItem i) {
+        return new OrderItemResponse(i.getId(), i.getProductName(), i.getSku(), i.getSize(), i.getColor(),
+                i.getUnitPriceCents(), i.getQuantity());
+    }
+
     private Order find(Long id) {
         return orders.findById(id).orElseThrow(() -> new ResourceNotFoundException("Order", id));
     }
@@ -161,8 +172,7 @@ public class OrderService {
 
     private OrderResponse toResponse(Order o) {
         List<OrderItemResponse> items = orderItems.findByOrderIdOrderByIdAsc(o.getId()).stream()
-                .map(i -> new OrderItemResponse(i.getId(), i.getProductName(), i.getSku(), i.getSize(), i.getColor(),
-                        i.getUnitPriceCents(), i.getQuantity()))
+                .map(OrderService::toItem)
                 .toList();
         return new OrderResponse(o.getId(), o.getOrderNumber(), o.getStatus(), o.getSubtotalCents(), o.getDiscountCents(),
                 o.getShippingCents(), o.getTotalCents(), o.getPromotionCode(), o.getShippingMethod(), o.getRecipient(),
