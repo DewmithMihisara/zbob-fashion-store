@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -124,6 +125,33 @@ class InventoryApiTest {
         mvc.perform(get("/api/v1/admin/inventory"))
                 .andExpect(jsonPath("$.content[0].size").value("L"))
                 .andExpect(jsonPath("$.content[1].size").value("S"));
+    }
+
+    @Test
+    void productVariantsArePaged() throws Exception {
+        variants.save(new ProductVariant(product, "BT-L", "L", "Black", 9));
+        variants.save(new ProductVariant(product, "BT-S", "S", "Black", 9));
+
+        mvc.perform(get(variantsUrl()).param("size", "1").param("page", "1"))
+                .andExpect(jsonPath("$.content[0].size").value("S"))
+                .andExpect(jsonPath("$.totalPages").value(2));
+    }
+
+    @Test
+    void variantsOfUnknownProductAreNotFound() throws Exception {
+        mvc.perform(get("/api/v1/admin/products/999999/variants")).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void editsVariantDetails() throws Exception {
+        ProductVariant variant = variants.save(new ProductVariant(product, "BT-M", "M", "Black", 1));
+
+        mvc.perform(put("/api/v1/admin/variants/" + variant.getId()).contentType(MediaType.APPLICATION_JSON)
+                        .content(variantJson("BT-NEW", "XL", 7)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sku").value("BT-NEW"))
+                .andExpect(jsonPath("$.size").value("XL"))
+                .andExpect(jsonPath("$.stockQuantity").value(7));
     }
 
     @Test
