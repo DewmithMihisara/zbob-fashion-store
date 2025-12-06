@@ -1,18 +1,24 @@
 package com.zbob.modules.customers.service;
 
 import com.zbob.common.dto.PageResponse;
+import com.zbob.exception.ConflictException;
 import com.zbob.exception.ResourceNotFoundException;
 import com.zbob.modules.customers.dto.AddressRequest;
 import com.zbob.modules.customers.dto.AddressResponse;
+import com.zbob.modules.customers.dto.CreateCustomerRequest;
+import com.zbob.modules.customers.dto.UpdateCustomerRequest;
 import com.zbob.modules.customers.entity.CustomerAddress;
 import com.zbob.modules.customers.repository.CustomerAddressRepository;
+import com.zbob.modules.orders.repository.OrderRepository;
 import com.zbob.modules.users.dto.UserResponse;
 import com.zbob.modules.users.entity.Role;
 import com.zbob.modules.users.entity.User;
 import com.zbob.modules.users.mapper.UserMapper;
 import com.zbob.modules.users.repository.UserRepository;
 import java.util.List;
+import java.util.Locale;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,10 +27,15 @@ public class CustomerService {
 
     private final UserRepository users;
     private final CustomerAddressRepository addresses;
+    private final OrderRepository orders;
+    private final PasswordEncoder encoder;
 
-    public CustomerService(UserRepository users, CustomerAddressRepository addresses) {
+    public CustomerService(UserRepository users, CustomerAddressRepository addresses, OrderRepository orders,
+            PasswordEncoder encoder) {
         this.users = users;
         this.addresses = addresses;
+        this.orders = orders;
+        this.encoder = encoder;
     }
 
     @Transactional(readOnly = true)
@@ -70,12 +81,53 @@ public class CustomerService {
     }
 
     @Transactional
+    public UserResponse createCustomer(CreateCustomerRequest request) {
+        String email = normalizeEmail(request.email());
+        if (users.existsByEmailIgnoreCase(email)) {
+            throw new ConflictException("An account with this email already exists");
+        }
+        User user = new User(email, encoder.encode(request.password()), request.fullName().trim(), Role.CUSTOMER);
+        return UserMapper.toResponse(users.save(user));
+    }
+
+    @Transactional
+    public UserResponse updateCustomer(Long id, UpdateCustomerRequest request) {
+        User user = findCustomer(id);
+        String email = normalizeEmail(request.email());
+        if (users.existsByEmailIgnoreCaseAndIdNot(email, id)) {
+            throw new ConflictException("An account with this email already exists");
+        }
+        user.setEmail(email);
+        user.setFullName(request.fullName().trim());
+        user.setActive(request.active());
+        return UserMapper.toResponse(user);
+    }
+
+    @Transactional
     public UserResponse setCustomerActive(Long id, boolean active) {
-        User user = users.findById(id)
-                .filter(u -> u.getRole() == Role.CUSTOMER)
-                .orElseThrow(() -> new ResourceNotFoundException("Customer", id));
+        User user = findCustomer(id);
         user.setActive(active);
         return UserMapper.toResponse(user);
+    }
+
+    /** Orders must stay on record, so a customer who has any can only be disabled. */
+    @Transactional
+    public void deleteCustomer(Long id) {
+        User user = findCustomer(id);
+        if (orders.existsByUserId(id)) {
+            throw new ConflictException("This customer has orders, so the account can only be disabled");
+        }
+        users.delete(user);
+    }
+
+    private User findCustomer(Long id) {
+        return users.findById(id)
+                .filter(u -> u.getRole() == Role.CUSTOMER)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer", id));
+    }
+
+    private static String normalizeEmail(String email) {
+        return email.trim().toLowerCase(Locale.ROOT);
     }
 
     private User findUser(Long id) {
