@@ -41,6 +41,19 @@ class CategoryApiTest {
     }
 
     @Test
+    @WithMockUser(roles = "STAFF")
+    void adminListIsPaged() throws Exception {
+        categories.save(new Category("Aaa", "aaa"));
+        categories.save(new Category("Bbb", "bbb"));
+
+        mvc.perform(get(ADMIN_URL).param("size", "1").param("page", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].name").value("Bbb"))
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.totalPages").value(2));
+    }
+
+    @Test
     void anonymousCannotCreate() throws Exception {
         mvc.perform(post(ADMIN_URL).contentType(MediaType.APPLICATION_JSON).content(BODY))
                 .andExpect(status().isUnauthorized());
