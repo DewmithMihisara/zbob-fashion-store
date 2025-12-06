@@ -41,6 +41,17 @@ class BrandApiTest {
     }
 
     @Test
+    @WithMockUser(roles = "STAFF")
+    void adminListIsPaged() throws Exception {
+        brands.save(new Brand("Aaa", "aaa"));
+        brands.save(new Brand("Bbb", "bbb"));
+
+        mvc.perform(get(ADMIN_URL).param("size", "1").param("page", "1"))
+                .andExpect(jsonPath("$.content[0].name").value("Bbb"))
+                .andExpect(jsonPath("$.totalPages").value(2));
+    }
+
+    @Test
     @WithMockUser(roles = "CUSTOMER")
     void customerCannotCreate() throws Exception {
         mvc.perform(post(ADMIN_URL).contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Other\"}"))
