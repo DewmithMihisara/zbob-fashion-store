@@ -1,6 +1,7 @@
 package com.zbob.modules.contact.service;
 
 import com.zbob.common.dto.PageResponse;
+import com.zbob.exception.ConflictException;
 import com.zbob.exception.ResourceNotFoundException;
 import com.zbob.modules.contact.dto.AdminMessageRequest;
 import com.zbob.modules.contact.dto.ContactMessageResponse;
@@ -40,7 +41,7 @@ public class ContactService {
     /** Subscribing twice succeeds quietly, so the response does not reveal who is already on the list. */
     @Transactional
     public void subscribe(NewsletterRequest request) {
-        String email = request.email().trim().toLowerCase(Locale.ROOT);
+        String email = normalize(request.email());
         if (!subscribers.existsByEmail(email)) {
             subscribers.save(new NewsletterSubscriber(email));
         }
@@ -80,8 +81,44 @@ public class ContactService {
 
     @Transactional(readOnly = true)
     public PageResponse<SubscriberResponse> listSubscribers(Pageable pageable) {
-        return PageResponse.of(subscribers.findAll(pageable),
-                s -> new SubscriberResponse(s.getId(), s.getEmail(), s.getCreatedAt()));
+        return PageResponse.of(subscribers.findAll(pageable), ContactService::toResponse);
+    }
+
+    @Transactional
+    public SubscriberResponse createSubscriber(NewsletterRequest request) {
+        String email = normalize(request.email());
+        if (subscribers.existsByEmail(email)) {
+            throw new ConflictException("This email is already subscribed");
+        }
+        return toResponse(subscribers.save(new NewsletterSubscriber(email)));
+    }
+
+    @Transactional
+    public SubscriberResponse updateSubscriber(Long id, NewsletterRequest request) {
+        NewsletterSubscriber subscriber = findSubscriber(id);
+        String email = normalize(request.email());
+        if (subscribers.existsByEmailAndIdNot(email, id)) {
+            throw new ConflictException("This email is already subscribed");
+        }
+        subscriber.setEmail(email);
+        return toResponse(subscriber);
+    }
+
+    @Transactional
+    public void deleteSubscriber(Long id) {
+        subscribers.delete(findSubscriber(id));
+    }
+
+    private NewsletterSubscriber findSubscriber(Long id) {
+        return subscribers.findById(id).orElseThrow(() -> new ResourceNotFoundException("Subscriber", id));
+    }
+
+    private static String normalize(String email) {
+        return email.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private static SubscriberResponse toResponse(NewsletterSubscriber s) {
+        return new SubscriberResponse(s.getId(), s.getEmail(), s.getCreatedAt());
     }
 
     private ContactMessage find(Long id) {

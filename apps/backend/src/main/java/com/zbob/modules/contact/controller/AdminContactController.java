@@ -3,6 +3,7 @@ package com.zbob.modules.contact.controller;
 import com.zbob.common.dto.PageResponse;
 import com.zbob.modules.contact.dto.AdminMessageRequest;
 import com.zbob.modules.contact.dto.ContactMessageResponse;
+import com.zbob.modules.contact.dto.NewsletterRequest;
 import com.zbob.modules.contact.dto.SubscriberResponse;
 import com.zbob.modules.contact.service.ContactService;
 import jakarta.validation.Valid;
@@ -58,6 +59,23 @@ public class AdminContactController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void delete(@PathVariable Long id) {
         contact.deleteMessage(id);
+    }
+
+    @PostMapping("/newsletter-subscribers")
+    @ResponseStatus(HttpStatus.CREATED)
+    SubscriberResponse createSubscriber(@Valid @RequestBody NewsletterRequest request) {
+        return contact.createSubscriber(request);
+    }
+
+    @PutMapping("/newsletter-subscribers/{id}")
+    SubscriberResponse updateSubscriber(@PathVariable Long id, @Valid @RequestBody NewsletterRequest request) {
+        return contact.updateSubscriber(id, request);
+    }
+
+    @DeleteMapping("/newsletter-subscribers/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void deleteSubscriber(@PathVariable Long id) {
+        contact.deleteSubscriber(id);
     }
 
     @GetMapping("/newsletter-subscribers")
