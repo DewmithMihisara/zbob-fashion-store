@@ -1,12 +1,16 @@
 package com.zbob.modules.brands.controller;
 
+import com.zbob.common.dto.PageResponse;
 import com.zbob.modules.brands.dto.request.BrandRequest;
 import com.zbob.modules.brands.dto.response.BrandResponse;
 import com.zbob.modules.brands.service.BrandService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -23,6 +27,11 @@ public class AdminBrandController {
 
     public AdminBrandController(BrandService brands) {
         this.brands = brands;
+    }
+
+    @GetMapping
+    PageResponse<BrandResponse> list(@PageableDefault(size = 20, sort = "name") Pageable pageable) {
+        return brands.listPaged(pageable);
     }
 
     @PostMapping

@@ -1,5 +1,6 @@
 package com.zbob.modules.brands.service.impl;
 
+import com.zbob.common.dto.PageResponse;
 import com.zbob.common.util.Slugs;
 import com.zbob.exception.ConflictException;
 import com.zbob.exception.ResourceNotFoundException;
@@ -11,6 +12,7 @@ import com.zbob.modules.brands.repository.BrandRepository;
 import com.zbob.modules.brands.service.BrandService;
 import com.zbob.modules.products.repository.ProductRepository;
 import java.util.List;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +31,12 @@ public class BrandServiceImpl implements BrandService {
     @Transactional(readOnly = true)
     public List<BrandResponse> list() {
         return brands.findAllByOrderByNameAsc().stream().map(BrandMapper::toResponse).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<BrandResponse> listPaged(Pageable pageable) {
+        return PageResponse.of(brands.findAll(pageable), BrandMapper::toResponse);
     }
 
     @Override
