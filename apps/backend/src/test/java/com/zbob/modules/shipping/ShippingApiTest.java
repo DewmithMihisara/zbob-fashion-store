@@ -50,6 +50,19 @@ class ShippingApiTest {
     }
 
     @Test
+    @WithMockUser(roles = "STAFF")
+    void adminListIsPagedAndIncludesInactive() throws Exception {
+        methods.save(new ShippingMethod("Aaa", 100, 1));
+        ShippingMethod off = new ShippingMethod("Bbb", 100, 1);
+        off.setActive(false);
+        methods.save(off);
+
+        mvc.perform(get("/api/v1/admin/shipping-methods").param("size", "1").param("page", "1"))
+                .andExpect(jsonPath("$.content[0].name").value("Bbb"))
+                .andExpect(jsonPath("$.totalPages").value(2));
+    }
+
+    @Test
     void anonymousCannotCreateMethod() throws Exception {
         mvc.perform(post("/api/v1/admin/shipping-methods").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Standard\",\"priceCents\":500,\"estimatedDays\":5,\"active\":true}"))
