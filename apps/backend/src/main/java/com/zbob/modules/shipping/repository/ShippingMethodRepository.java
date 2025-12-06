@@ -7,6 +7,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ShippingMethodRepository extends JpaRepository<ShippingMethod, Long> {
 
     List<ShippingMethod> findByActiveTrueOrderByPriceCentsAsc();
-
-    List<ShippingMethod> findAllByOrderByNameAsc();
 }

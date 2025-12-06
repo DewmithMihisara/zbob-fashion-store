@@ -1,11 +1,13 @@
 package com.zbob.modules.shipping.service;
 
+import com.zbob.common.dto.PageResponse;
 import com.zbob.exception.ResourceNotFoundException;
 import com.zbob.modules.shipping.dto.ShippingMethodRequest;
 import com.zbob.modules.shipping.dto.ShippingMethodResponse;
 import com.zbob.modules.shipping.entity.ShippingMethod;
 import com.zbob.modules.shipping.repository.ShippingMethodRepository;
 import java.util.List;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,8 +26,8 @@ public class ShippingService {
     }
 
     @Transactional(readOnly = true)
-    public List<ShippingMethodResponse> listAll() {
-        return methods.findAllByOrderByNameAsc().stream().map(ShippingService::toResponse).toList();
+    public PageResponse<ShippingMethodResponse> listAll(Pageable pageable) {
+        return PageResponse.of(methods.findAll(pageable), ShippingService::toResponse);
     }
 
     @Transactional
