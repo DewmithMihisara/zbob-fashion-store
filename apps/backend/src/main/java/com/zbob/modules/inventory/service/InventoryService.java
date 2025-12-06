@@ -11,6 +11,8 @@ public interface InventoryService {
 
     PageResponse<InventoryRowResponse> list(boolean lowStockOnly, Pageable pageable);
 
+    PageResponse<VariantResponse> listForProduct(Long productId, Pageable pageable);
+
     VariantResponse addVariant(Long productId, VariantRequest request);
 
     VariantResponse updateVariant(Long variantId, VariantRequest request);

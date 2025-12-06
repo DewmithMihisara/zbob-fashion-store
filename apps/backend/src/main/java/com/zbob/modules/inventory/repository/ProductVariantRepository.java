@@ -13,6 +13,8 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
 
     List<ProductVariant> findByProductIdOrderBySizeAscColorAsc(Long productId);
 
+    Page<ProductVariant> findByProductId(Long productId, Pageable pageable);
+
     /** Returns 0 when there is not enough stock, so two simultaneous orders can never oversell. */
     @Modifying
     @Query("update ProductVariant v set v.stockQuantity = v.stockQuantity - :quantity where v.id = :id and v.stockQuantity >= :quantity")

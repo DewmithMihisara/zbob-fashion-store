@@ -39,6 +39,15 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public PageResponse<VariantResponse> listForProduct(Long productId, Pageable pageable) {
+        if (!products.existsById(productId)) {
+            throw new ResourceNotFoundException("Product", productId);
+        }
+        return PageResponse.of(variants.findByProductId(productId, pageable), ProductMapper::toVariant);
+    }
+
+    @Override
     @Transactional
     public VariantResponse addVariant(Long productId, VariantRequest request) {
         Product product = products.findById(productId)

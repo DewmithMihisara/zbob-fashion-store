@@ -39,6 +39,12 @@ public class AdminInventoryController {
         return inventory.list(lowStockOnly, pageable);
     }
 
+    @GetMapping("/products/{productId}/variants")
+    PageResponse<VariantResponse> listForProduct(@PathVariable Long productId,
+            @PageableDefault(size = 10, sort = {"size", "color"}) Pageable pageable) {
+        return inventory.listForProduct(productId, pageable);
+    }
+
     @PostMapping("/products/{productId}/variants")
     @ResponseStatus(HttpStatus.CREATED)
     VariantResponse add(@PathVariable Long productId, @Valid @RequestBody VariantRequest request) {
