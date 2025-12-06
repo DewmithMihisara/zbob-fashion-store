@@ -1,5 +1,6 @@
 package com.zbob.modules.categories.service.impl;
 
+import com.zbob.common.dto.PageResponse;
 import com.zbob.common.util.Slugs;
 import com.zbob.exception.ConflictException;
 import com.zbob.exception.ResourceNotFoundException;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +47,12 @@ public class CategoryServiceImpl implements CategoryService {
             return new CategoryWithPricesResponse(c.getId(), c.getName(), c.getSlug(), c.getDescription(), c.getBadge(),
                     range == null ? null : range.getMinCents(), range == null ? null : range.getMaxCents());
         }).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<CategoryResponse> listPaged(Pageable pageable) {
+        return PageResponse.of(categories.findAll(pageable), CategoryMapper::toResponse);
     }
 
     @Override
