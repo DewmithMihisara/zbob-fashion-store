@@ -5,11 +5,15 @@ import { formatPrice } from "@zbob/shared-utils";
 import Link from "next/link";
 import { useState } from "react";
 import { ErrorAlert } from "@/components/ui/Alert";
+import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { Cell, EmptyRow, Table } from "@/components/ui/Table";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Pagination } from "@/components/ui/Pagination";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { useAction } from "@/hooks/useAction";
 import { useData } from "@/hooks/useData";
+import { useSession } from "@/hooks/useSession";
+import { api } from "@/lib/api";
 
 const inputClass = "h-9 rounded-lg border border-line bg-paper px-3 text-[13px] outline-none focus:border-ink";
 
@@ -22,7 +26,9 @@ export default function ProductsPage() {
   if (search.trim()) query.set("search", search.trim());
   if (category) query.set("category", category);
 
-  const { data, error, loading } = useData<Page<ProductSummary>>(`/admin/products?${query}`);
+  const session = useSession();
+  const remove = useAction();
+  const { data, error, loading, reload } = useData<Page<ProductSummary>>(`/admin/products?${query}`);
   const { data: categories } = useData<Category[]>("/categories");
 
   return (
@@ -65,8 +71,8 @@ export default function ProductsPage() {
           ))}
         </select>
       </div>
-      <ErrorAlert message={error} />
-      <Table headers={["Photo", "Name", "Price", "Status", "Stock"]}>
+      <ErrorAlert message={error ?? remove.error} />
+      <Table headers={["Photo", "Name", "Price", "Status", "Stock", ""]}>
         {data?.content.map((product) => (
           <tr key={product.id} className="hover:bg-canvas">
             <Cell>
@@ -90,10 +96,22 @@ export default function ProductsPage() {
             <Cell>
               <StatusBadge tone={product.inStock ? "good" : "bad"}>{product.inStock ? "In stock" : "Out of stock"}</StatusBadge>
             </Cell>
+            <Cell className="text-right">
+              <span className="inline-flex items-center gap-1">
+                <Link href={`/products/${product.id}`} className="inline-flex h-9 items-center rounded-lg border border-line bg-paper px-3 text-[13px] font-medium hover:bg-canvas">
+                  Edit
+                </Link>
+                {session?.role === "ADMIN" && (
+                  <ConfirmButton confirmLabel="Yes" onConfirm={() => remove.run(() => api(`/admin/products/${product.id}`, { method: "DELETE" })).then(reload)}>
+                    Delete
+                  </ConfirmButton>
+                )}
+              </span>
+            </Cell>
           </tr>
         ))}
-        {data?.content.length === 0 && <EmptyRow columns={5}>No products found.</EmptyRow>}
-        {!data && loading && <EmptyRow columns={5}>Loading...</EmptyRow>}
+        {data?.content.length === 0 && <EmptyRow columns={6}>No products found.</EmptyRow>}
+        {!data && loading && <EmptyRow columns={6}>Loading...</EmptyRow>}
       </Table>
       <Pagination page={data} onChange={setPage} />
     </>
