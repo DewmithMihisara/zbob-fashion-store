@@ -8,10 +8,12 @@ import com.zbob.modules.carts.entity.Cart;
 import com.zbob.modules.carts.entity.CartItem;
 import com.zbob.modules.carts.repository.CartItemRepository;
 import com.zbob.modules.carts.repository.CartRepository;
+import com.zbob.modules.customers.dto.AddressRequest;
 import com.zbob.modules.customers.entity.CustomerAddress;
 import com.zbob.modules.customers.repository.CustomerAddressRepository;
 import com.zbob.modules.inventory.entity.ProductVariant;
 import com.zbob.modules.inventory.repository.ProductVariantRepository;
+import com.zbob.modules.orders.dto.AdminCreateOrderRequest;
 import com.zbob.modules.orders.dto.CreateOrderRequest;
 import com.zbob.modules.orders.dto.OrderItemResponse;
 import com.zbob.modules.orders.dto.OrderResponse;
@@ -24,7 +26,11 @@ import com.zbob.modules.orders.repository.OrderRepository;
 import com.zbob.modules.promotions.service.PromotionService;
 import com.zbob.modules.shipping.entity.ShippingMethod;
 import com.zbob.modules.shipping.repository.ShippingMethodRepository;
+import com.zbob.modules.users.entity.Role;
+import com.zbob.modules.users.entity.User;
+import com.zbob.modules.users.repository.UserRepository;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
@@ -51,10 +57,11 @@ public class OrderService {
     private final ShippingMethodRepository shippingMethods;
     private final ProductVariantRepository variants;
     private final PromotionService promotions;
+    private final UserRepository users;
 
     public OrderService(OrderRepository orders, OrderItemRepository orderItems, CartRepository carts,
             CartItemRepository cartItems, CustomerAddressRepository addresses, ShippingMethodRepository shippingMethods,
-            ProductVariantRepository variants, PromotionService promotions) {
+            ProductVariantRepository variants, PromotionService promotions, UserRepository users) {
         this.orders = orders;
         this.orderItems = orderItems;
         this.carts = carts;
@@ -63,6 +70,7 @@ public class OrderService {
         this.shippingMethods = shippingMethods;
         this.variants = variants;
         this.promotions = promotions;
+        this.users = users;
     }
 
     @Transactional
@@ -102,6 +110,68 @@ public class OrderService {
         }
         cartItems.deleteByCartId(cart.getId());
         return toResponse(order);
+    }
+
+    @Transactional
+    public OrderResponse createForCustomer(AdminCreateOrderRequest request) {
+        User customer = users.findById(request.customerId())
+                .filter(u -> u.getRole() == Role.CUSTOMER)
+                .orElseThrow(() -> new BadRequestException("Unknown customer"));
+        ShippingMethod shipping = shippingMethods.findById(request.shippingMethodId())
+                .orElseThrow(() -> new BadRequestException("Unknown delivery method"));
+
+        int subtotal = 0;
+        List<ProductVariant> lineVariants = new ArrayList<>();
+        for (AdminCreateOrderRequest.Line line : request.items()) {
+            ProductVariant variant = variants.findById(line.variantId())
+                    .orElseThrow(() -> new BadRequestException("Unknown item: " + line.variantId()));
+            lineVariants.add(variant);
+            subtotal += variant.getProduct().getPriceCents() * line.quantity();
+        }
+        boolean hasCode = StringUtils.hasText(request.promotionCode());
+        int discount = hasCode ? promotions.discountFor(request.promotionCode().trim(), subtotal) : 0;
+
+        Order order = new Order(newOrderNumber(), customer.getId());
+        order.setTotals(subtotal, discount, shipping.getPriceCents(),
+                hasCode ? request.promotionCode().trim().toUpperCase(Locale.ROOT) : null, shipping.getName());
+        applyAddress(order, request.address());
+        orders.save(order);
+
+        for (int i = 0; i < lineVariants.size(); i++) {
+            ProductVariant variant = lineVariants.get(i);
+            int quantity = request.items().get(i).quantity();
+            if (variants.reserveStock(variant.getId(), quantity) == 0) {
+                throw new ConflictException(variant.getProduct().getName() + " does not have enough stock");
+            }
+            orderItems.save(new OrderItem(order.getId(), variant.getId(), variant.getProduct().getName(), variant.getSku(),
+                    variant.getSize(), variant.getColor(), variant.getProduct().getPriceCents(), quantity));
+        }
+        return toResponse(order);
+    }
+
+    /** Delivery details can change until the order has shipped. */
+    @Transactional
+    public OrderResponse updateAddress(Long id, AddressRequest address) {
+        Order order = find(id);
+        if (order.getStatus() != OrderStatus.PENDING_PAYMENT && order.getStatus() != OrderStatus.PAID) {
+            throw new ConflictException("The address can only change before the order ships");
+        }
+        applyAddress(order, address);
+        return toResponse(order);
+    }
+
+    /** Only cancelled orders can go, because cancelling is what returns the items to stock. */
+    @Transactional
+    public void delete(Long id) {
+        Order order = find(id);
+        if (order.getStatus() != OrderStatus.CANCELLED) {
+            throw new ConflictException("Cancel the order before deleting it");
+        }
+        orders.delete(order);
+    }
+
+    private static void applyAddress(Order order, AddressRequest a) {
+        order.setAddress(a.recipient(), a.line1(), a.line2(), a.city(), a.region(), a.postalCode(), a.country(), a.phone());
     }
 
     @Transactional(readOnly = true)
