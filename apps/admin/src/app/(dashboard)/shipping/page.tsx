@@ -1,6 +1,6 @@
 "use client";
 
-import type { ShippingMethod } from "@zbob/shared-types";
+import type { Page, ShippingMethod } from "@zbob/shared-types";
 import { centsToInput, formatPrice, parsePrice } from "@zbob/shared-utils";
 import { useState, type FormEvent } from "react";
 import { ErrorAlert } from "@/components/ui/Alert";
@@ -9,6 +9,7 @@ import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { CheckboxField, TextField } from "@/components/ui/Field";
 import { Modal } from "@/components/ui/Modal";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { Pagination } from "@/components/ui/Pagination";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Cell, EmptyRow, Table } from "@/components/ui/Table";
 import { useAction } from "@/hooks/useAction";
@@ -61,7 +62,8 @@ function ShippingForm({ method, onDone }: { method: ShippingMethod | null; onDon
 }
 
 export default function ShippingPage() {
-  const { data, error, reload } = useData<ShippingMethod[]>("/admin/shipping-methods");
+  const [page, setPage] = useState(0);
+  const { data, error, reload } = useData<Page<ShippingMethod>>(`/admin/shipping-methods?page=${page}`);
   const [editing, setEditing] = useState<ShippingMethod | "new" | null>(null);
   const remove = useAction();
 
@@ -70,7 +72,7 @@ export default function ShippingPage() {
       <PageHeader title="Shipping" description="Delivery options. These apply once online ordering is switched on." action={<Button onClick={() => setEditing("new")}>Add method</Button>} />
       <ErrorAlert message={error ?? remove.error} />
       <Table headers={["Name", "Price", "Estimated days", "Status", ""]}>
-        {data?.map((method) => (
+        {data?.content.map((method) => (
           <tr key={method.id}>
             <Cell className="font-medium">{method.name}</Cell>
             <Cell>{formatPrice(method.priceCents)}</Cell>
@@ -90,8 +92,9 @@ export default function ShippingPage() {
             </Cell>
           </tr>
         ))}
-        {data?.length === 0 && <EmptyRow columns={5}>No delivery options yet.</EmptyRow>}
+        {data?.content.length === 0 && <EmptyRow columns={5}>No delivery options yet.</EmptyRow>}
       </Table>
+      <Pagination page={data} onChange={setPage} />
       {editing && (
         <Modal title={editing === "new" ? "Add method" : "Edit method"} onClose={() => setEditing(null)}>
           <ShippingForm
