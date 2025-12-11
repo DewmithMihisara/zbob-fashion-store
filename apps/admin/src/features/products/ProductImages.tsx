@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { ImageUploadButton } from "@/components/ui/ImageUploadButton";
 import { api, errorMessage } from "@/lib/api";
+import { MAX_PRODUCT_PHOTOS, photoLimitProblem } from "@/lib/product-photos";
 
 /** Upload, order and remove a product's photos. The first photo is the one shown on product cards. */
 export function ProductImages({ productId, images, onChange }: { productId: number; images: ProductImage[]; onChange: () => void }) {
@@ -27,6 +28,11 @@ export function ProductImages({ productId, images, onChange }: { productId: numb
   }
 
   function upload(files: File[]) {
+    const problem = photoLimitProblem(images.length, files.length);
+    if (problem) {
+      setError(problem);
+      return;
+    }
     return run(async () => {
       for (const file of files) {
         const form = new FormData();
@@ -47,11 +53,13 @@ export function ProductImages({ productId, images, onChange }: { productId: numb
     <section className="rounded-xl border border-line bg-paper p-5">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h2 className="text-[16px] font-semibold">Photos</h2>
+          <h2 className="text-[16px] font-semibold">
+            Photos ({images.length} of {MAX_PRODUCT_PHOTOS})
+          </h2>
           <p className="text-[13px] text-muted">The first photo appears on product cards. The website shows a placeholder until you add one.</p>
         </div>
-        <ImageUploadButton multiple variant="primary" disabled={busy} onFiles={upload} onProblem={setError}>
-          {busy ? "Working..." : "Upload photos"}
+        <ImageUploadButton multiple variant="primary" disabled={busy || images.length >= MAX_PRODUCT_PHOTOS} onFiles={upload} onProblem={setError}>
+          {busy ? "Working..." : images.length >= MAX_PRODUCT_PHOTOS ? "Limit reached" : "Upload photos"}
         </ImageUploadButton>
       </div>
       <ErrorAlert message={error} />
