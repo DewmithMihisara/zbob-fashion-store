@@ -1,6 +1,6 @@
 "use client";
 
-import type { Category } from "@zbob/shared-types";
+import type { Category, Page } from "@zbob/shared-types";
 import { useState, type FormEvent } from "react";
 import { ErrorAlert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
@@ -8,6 +8,7 @@ import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { TextArea, TextField } from "@/components/ui/Field";
 import { Modal } from "@/components/ui/Modal";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { Pagination } from "@/components/ui/Pagination";
 import { Cell, EmptyRow, Table } from "@/components/ui/Table";
 import { useAction } from "@/hooks/useAction";
 import { useData } from "@/hooks/useData";
@@ -50,7 +51,8 @@ function CategoryForm({ category, onDone }: { category: Category | null; onDone:
 
 export default function CategoriesPage() {
   const session = useSession();
-  const { data, error, reload } = useData<Category[]>("/categories");
+  const [page, setPage] = useState(0);
+  const { data, error, reload } = useData<Page<Category>>(`/admin/categories?page=${page}`);
   const [editing, setEditing] = useState<Category | "new" | null>(null);
   const remove = useAction();
 
@@ -59,7 +61,7 @@ export default function CategoriesPage() {
       <PageHeader title="Categories" description="The groups used to filter the shop." action={<Button onClick={() => setEditing("new")}>Add category</Button>} />
       <ErrorAlert message={error ?? remove.error} />
       <Table headers={["Name", "Link", "Badge", "Order", ""]}>
-        {data?.map((category) => (
+        {data?.content.map((category) => (
           <tr key={category.id}>
             <Cell className="font-medium">{category.name}</Cell>
             <Cell className="text-muted">{category.slug}</Cell>
@@ -79,8 +81,9 @@ export default function CategoriesPage() {
             </Cell>
           </tr>
         ))}
-        {data?.length === 0 && <EmptyRow columns={5}>No categories yet.</EmptyRow>}
+        {data?.content.length === 0 && <EmptyRow columns={5}>No categories yet.</EmptyRow>}
       </Table>
+      <Pagination page={data} onChange={setPage} />
       {editing && (
         <Modal title={editing === "new" ? "Add category" : "Edit category"} onClose={() => setEditing(null)}>
           <CategoryForm
