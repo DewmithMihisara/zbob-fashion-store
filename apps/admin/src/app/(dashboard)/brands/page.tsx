@@ -1,6 +1,6 @@
 "use client";
 
-import type { Brand } from "@zbob/shared-types";
+import type { Brand, Page } from "@zbob/shared-types";
 import { useState, type FormEvent } from "react";
 import { ErrorAlert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
@@ -8,6 +8,7 @@ import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { TextField } from "@/components/ui/Field";
 import { Modal } from "@/components/ui/Modal";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { Pagination } from "@/components/ui/Pagination";
 import { Cell, EmptyRow, Table } from "@/components/ui/Table";
 import { useAction } from "@/hooks/useAction";
 import { useData } from "@/hooks/useData";
@@ -43,7 +44,8 @@ function BrandForm({ brand, onDone }: { brand: Brand | null; onDone: () => void 
 
 export default function BrandsPage() {
   const session = useSession();
-  const { data, error, reload } = useData<Brand[]>("/brands");
+  const [page, setPage] = useState(0);
+  const { data, error, reload } = useData<Page<Brand>>(`/admin/brands?page=${page}`);
   const [editing, setEditing] = useState<Brand | "new" | null>(null);
   const remove = useAction();
 
@@ -52,7 +54,7 @@ export default function BrandsPage() {
       <PageHeader title="Brands" action={<Button onClick={() => setEditing("new")}>Add brand</Button>} />
       <ErrorAlert message={error ?? remove.error} />
       <Table headers={["Name", "Link", ""]}>
-        {data?.map((brand) => (
+        {data?.content.map((brand) => (
           <tr key={brand.id}>
             <Cell className="font-medium">{brand.name}</Cell>
             <Cell className="text-muted">{brand.slug}</Cell>
@@ -70,8 +72,9 @@ export default function BrandsPage() {
             </Cell>
           </tr>
         ))}
-        {data?.length === 0 && <EmptyRow columns={3}>No brands yet.</EmptyRow>}
+        {data?.content.length === 0 && <EmptyRow columns={3}>No brands yet.</EmptyRow>}
       </Table>
+      <Pagination page={data} onChange={setPage} />
       {editing && (
         <Modal title={editing === "new" ? "Add brand" : "Edit brand"} onClose={() => setEditing(null)}>
           <BrandForm
