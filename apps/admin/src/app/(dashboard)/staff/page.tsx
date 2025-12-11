@@ -4,9 +4,11 @@ import type { Page, Role, UserAccount } from "@zbob/shared-types";
 import { useState, type FormEvent } from "react";
 import { ErrorAlert, SavedAlert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
+import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { CheckboxField, SelectField, TextField } from "@/components/ui/Field";
 import { Modal } from "@/components/ui/Modal";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { Pagination } from "@/components/ui/Pagination";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Cell, EmptyRow, Table } from "@/components/ui/Table";
 import { useAction } from "@/hooks/useAction";
@@ -98,8 +100,10 @@ function EditStaffForm({ member, onDone }: { member: UserAccount; onDone: () => 
 
 export default function StaffPage() {
   const session = useSession();
-  const { data, error, reload } = useData<Page<UserAccount>>("/admin/staff");
+  const [page, setPage] = useState(0);
+  const { data, error, reload } = useData<Page<UserAccount>>(`/admin/staff?page=${page}`);
   const [editing, setEditing] = useState<UserAccount | "new" | null>(null);
+  const remove = useAction();
 
   if (session?.role !== "ADMIN") {
     return <p className="text-muted">Only admins can manage staff.</p>;
@@ -108,7 +112,7 @@ export default function StaffPage() {
   return (
     <>
       <PageHeader title="Staff" description="People who can sign in to this dashboard." action={<Button onClick={() => setEditing("new")}>Add staff member</Button>} />
-      <ErrorAlert message={error} />
+      <ErrorAlert message={error ?? remove.error} />
       <Table headers={["Name", "Email", "Role", "Status", ""]}>
         {data?.content.map((member) => (
           <tr key={member.id}>
@@ -119,14 +123,20 @@ export default function StaffPage() {
               <StatusBadge tone={member.active ? "good" : "bad"}>{member.active ? "Active" : "Disabled"}</StatusBadge>
             </Cell>
             <Cell className="text-right">
-              <Button variant="secondary" onClick={() => setEditing(member)}>
-                Edit
-              </Button>
+              <span className="inline-flex gap-1">
+                <Button variant="secondary" onClick={() => setEditing(member)}>
+                  Edit
+                </Button>
+                <ConfirmButton confirmLabel="Yes" onConfirm={() => remove.run(() => api(`/admin/staff/${member.id}`, { method: "DELETE" })).then(reload)}>
+                  Delete
+                </ConfirmButton>
+              </span>
             </Cell>
           </tr>
         ))}
         {data?.content.length === 0 && <EmptyRow columns={5}>No staff yet.</EmptyRow>}
       </Table>
+      <Pagination page={data} onChange={setPage} />
       {editing && (
         <Modal title={editing === "new" ? "Add staff member" : `Edit ${editing.fullName}`} onClose={() => setEditing(null)}>
           {editing === "new" ? (
