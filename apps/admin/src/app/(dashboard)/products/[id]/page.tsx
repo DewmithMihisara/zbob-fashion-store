@@ -47,7 +47,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
       {product && (
         <div className="flex flex-col gap-5">
           <ProductImages productId={product.id} images={product.images} onChange={reload} />
-          <ProductVariants productId={product.id} variants={product.variants} onChange={reload} />
+          <ProductVariants productId={product.id} onChange={reload} />
           <ProductForm key={product.id} product={product} onSaved={reload} />
         </div>
       )}
