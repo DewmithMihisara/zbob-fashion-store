@@ -141,7 +141,7 @@ test("products and blog tables delete from the row", async ({ page }) => {
   await page.goto(`${ADMIN}/blog/new`);
   await page.getByLabel("Title").fill(`Row Post ${id}`);
   await page.getByLabel("Short summary").fill("Summary");
-  await page.getByLabel("Post", { exact: true }).fill("Body");
+  await page.getByLabel(/^Post/).fill("Body");
   await page.getByRole("button", { name: "Create post" }).click();
   await expect(page.getByRole("heading", { name: `Row Post ${id}` })).toBeVisible();
   await page.goto(`${ADMIN}/blog`);
@@ -170,7 +170,7 @@ test("orders: add, edit address, cancel and delete", async ({ page }) => {
   const form = page.locator("form");
   await form.getByLabel("Customer").selectOption({ label: `Buyer ${id} (buyer-${id}@zbob.test)` });
   await form.getByLabel("Item 1").selectOption({ index: 1 });
-  await form.getByLabel("Delivery", { exact: true }).selectOption({ label: `Ship ${id}` });
+  await form.getByLabel(/^Delivery/).selectOption({ label: `Ship ${id}` });
   await form.getByLabel("Recipient").fill("Sam Buyer");
   await form.getByLabel("Address line 1").fill("1 Main St");
   await form.getByLabel("City").fill("Town");
