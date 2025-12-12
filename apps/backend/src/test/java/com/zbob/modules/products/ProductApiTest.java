@@ -137,6 +137,22 @@ class ProductApiTest {
     }
 
     @Test
+    void optionsListEachSizeAndColourWithoutCounts() throws Exception {
+        Product product = saveProduct("Option Tee", true, null);
+        variants.save(new ProductVariant(product, "OP-M", "M", "Black", 7));
+        variants.save(new ProductVariant(product, "OP-S", "S", "Black", 0));
+
+        mvc.perform(get(PUBLIC_URL + "/option-tee"))
+                .andExpect(jsonPath("$.options", hasSize(2)))
+                .andExpect(jsonPath("$.options[0].size").value("M"))
+                .andExpect(jsonPath("$.options[0].inStock").value(true))
+                .andExpect(jsonPath("$.options[1].size").value("S"))
+                .andExpect(jsonPath("$.options[1].inStock").value(false))
+                .andExpect(jsonPath("$.options[0].stockQuantity").doesNotExist())
+                .andExpect(jsonPath("$.options[0].sku").doesNotExist());
+    }
+
+    @Test
     void unpublishedProductPageIsNotFound() throws Exception {
         saveProduct("Draft Tee", false, null);
 
