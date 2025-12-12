@@ -1,6 +1,8 @@
 # End-to-end tests
 
-These drive the real storefront, admin dashboard and API in a browser. They change data, so point them at a throwaway database, never a real one.
+These drive the real storefront, admin dashboard and API in a browser. They change data, so point them at a throwaway database, never a real one. The run stops straight away if the test admin below can not sign in, which is how it avoids a real store.
+
+To keep your normal servers running, start the test ones on other ports and set `E2E_API_URL`, `E2E_STORE_URL` and `E2E_ADMIN_URL`. The API then also needs `PORT`, `STORAGE_PUBLIC_BASE_URL` and `CORS_ALLOWED_ORIGINS` to match, and the frontends need `API_URL` and `NEXT_PUBLIC_API_URL`.
 
 ```sh
 # 1. Create an empty database
