@@ -5,21 +5,35 @@ import { formatPrice } from "@zbob/shared-utils";
 import Link from "next/link";
 import { useState } from "react";
 import { ErrorAlert } from "@/components/ui/Alert";
+import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Pagination } from "@/components/ui/Pagination";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Cell, EmptyRow, Table } from "@/components/ui/Table";
 import { statusLabels, statusTones } from "@/features/orders/status";
+import { useAction } from "@/hooks/useAction";
 import { useData } from "@/hooks/useData";
+import { useSession } from "@/hooks/useSession";
+import { api } from "@/lib/api";
 
 export default function OrdersPage() {
   const [status, setStatus] = useState<OrderStatus | "">("");
   const [page, setPage] = useState(0);
-  const { data, error } = useData<Page<OrderSummary>>(`/admin/orders?page=${page}${status ? `&status=${status}` : ""}`);
+  const session = useSession();
+  const remove = useAction();
+  const { data, error, reload } = useData<Page<OrderSummary>>(`/admin/orders?page=${page}${status ? `&status=${status}` : ""}`);
 
   return (
     <>
-      <PageHeader title="Orders" description="Order Now on the website is not connected to a payment gateway yet, so no orders are created from it." />
+      <PageHeader
+        title="Orders"
+        description="Order Now on the website is not connected to a payment gateway yet, so no orders are created from it. Only cancelled orders can be deleted."
+        action={
+          <Link href="/orders/new" className="inline-flex h-9 items-center rounded-lg bg-ink px-3 text-[13px] font-medium text-paper hover:bg-neutral-800">
+            Add order
+          </Link>
+        }
+      />
       <select
         aria-label="Filter by status"
         value={status}
@@ -36,8 +50,8 @@ export default function OrdersPage() {
           </option>
         ))}
       </select>
-      <ErrorAlert message={error} />
-      <Table headers={["Order", "Customer", "Date", "Total", "Status"]}>
+      <ErrorAlert message={error ?? remove.error} />
+      <Table headers={["Order", "Customer", "Date", "Total", "Status", ""]}>
         {data?.content.map((order) => (
           <tr key={order.id} className="hover:bg-canvas">
             <Cell>
@@ -51,9 +65,21 @@ export default function OrdersPage() {
             <Cell>
               <StatusBadge tone={statusTones[order.status]}>{statusLabels[order.status]}</StatusBadge>
             </Cell>
+            <Cell className="text-right">
+              <span className="inline-flex items-center gap-1">
+                <Link href={`/orders/${order.id}`} className="inline-flex h-9 items-center rounded-lg border border-line bg-paper px-3 text-[13px] font-medium hover:bg-canvas">
+                  Edit
+                </Link>
+                {session?.role === "ADMIN" && order.status === "CANCELLED" && (
+                  <ConfirmButton confirmLabel="Yes" onConfirm={() => remove.run(() => api(`/admin/orders/${order.id}`, { method: "DELETE" })).then(reload)}>
+                    Delete
+                  </ConfirmButton>
+                )}
+              </span>
+            </Cell>
           </tr>
         ))}
-        {data?.content.length === 0 && <EmptyRow columns={5}>No orders yet.</EmptyRow>}
+        {data?.content.length === 0 && <EmptyRow columns={6}>No orders yet.</EmptyRow>}
       </Table>
       <Pagination page={data} onChange={setPage} />
     </>
