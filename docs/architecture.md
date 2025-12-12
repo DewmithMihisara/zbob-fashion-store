@@ -38,7 +38,7 @@ Admins and customers sign in at separate endpoints. An account's role is read fr
 
 There are two kinds, both uploaded in the dashboard:
 
-- **Product photos** belong to a product (`product_images`). The first is shown on product cards.
+- **Product photos** belong to a product (`product_images`), up to 5 each. The first is shown on product cards.
 - **Site photos** fill named slots such as `home-hero-1` (`site_media`). `SiteMediaSlots` lists every slot.
 
 Anything without a photo shows a neutral placeholder on the storefront. Uploads are identified from the file's contents, not its name, and are stored under a generated name.
