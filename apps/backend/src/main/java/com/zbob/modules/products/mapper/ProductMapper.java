@@ -8,6 +8,7 @@ import com.zbob.modules.products.dto.response.ProductImageResponse;
 import com.zbob.modules.products.dto.response.ProductResponse;
 import com.zbob.modules.products.dto.response.ProductSummaryResponse;
 import com.zbob.modules.products.dto.response.PublicProductResponse;
+import com.zbob.modules.products.dto.response.PublicVariantOption;
 import com.zbob.modules.products.entity.Product;
 import com.zbob.modules.products.entity.ProductImage;
 import java.util.List;
@@ -34,10 +35,14 @@ public final class ProductMapper {
                 variants.stream().map(ProductMapper::toVariant).toList());
     }
 
-    public static PublicProductResponse toPublic(Product p, List<ProductImage> images, boolean inStock) {
+    public static PublicProductResponse toPublic(Product p, List<ProductImage> images, List<ProductVariant> variants) {
         return new PublicProductResponse(p.getId(), p.getName(), p.getSlug(), p.getDescription(), p.getMaterial(),
-                p.getCare(), p.getWarranty(), p.getBadge(), p.getPriceCents(), p.getCompareAtPriceCents(), inStock,
-                CategoryMapper.toResponse(p.getCategory()), images.stream().map(ProductMapper::toImage).toList());
+                p.getCare(), p.getWarranty(), p.getBadge(), p.getPriceCents(), p.getCompareAtPriceCents(),
+                variants.stream().anyMatch(v -> v.getStockQuantity() > 0),
+                CategoryMapper.toResponse(p.getCategory()), images.stream().map(ProductMapper::toImage).toList(),
+                variants.stream()
+                        .map(v -> new PublicVariantOption(v.getId(), v.getSize(), v.getColor(), v.getStockQuantity() > 0))
+                        .toList());
     }
 
     public static ProductImageResponse toImage(ProductImage i) {

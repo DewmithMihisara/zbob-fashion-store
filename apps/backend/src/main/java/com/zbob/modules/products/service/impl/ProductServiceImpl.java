@@ -70,8 +70,8 @@ public class ProductServiceImpl implements ProductService {
     public PublicProductResponse getPublished(String slug) {
         Product product = products.findBySlugAndPublishedTrue(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", slug));
-        boolean inStock = !variants.findProductIdsInStock(List.of(product.getId())).isEmpty();
-        return ProductMapper.toPublic(product, images.findByProductIdOrderByPositionAscIdAsc(product.getId()), inStock);
+        return ProductMapper.toPublic(product, images.findByProductIdOrderByPositionAscIdAsc(product.getId()),
+                variants.findByProductIdOrderBySizeAscColorAsc(product.getId()));
     }
 
     @Override

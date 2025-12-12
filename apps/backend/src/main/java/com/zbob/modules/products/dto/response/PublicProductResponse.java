@@ -18,5 +18,6 @@ public record PublicProductResponse(
         Integer compareAtPriceCents,
         boolean inStock,
         CategoryResponse category,
-        List<ProductImageResponse> images) {
+        List<ProductImageResponse> images,
+        List<PublicVariantOption> options) {
 }
