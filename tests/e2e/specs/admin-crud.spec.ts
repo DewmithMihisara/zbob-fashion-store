@@ -113,7 +113,9 @@ test("stock page: add, edit and delete a row", async ({ page }) => {
   await dialog(page).getByRole("button", { name: "Save" }).click();
   await expect(dialog(page)).toHaveCount(0);
 
-  await page.getByRole("checkbox", { name: "Show only low and out of stock" }).check();
+  // This checkbox follows the page URL, so it only shows as ticked once navigation finishes.
+  await page.getByRole("checkbox", { name: "Show only low and out of stock" }).click();
+  await expect(page).toHaveURL(/low=1/);
   const row = page.getByRole("row").filter({ hasText: `SKU-${id}` });
   await expect(row).toBeVisible();
 
