@@ -12,7 +12,11 @@ import com.zbob.modules.carts.repository.CartItemRepository;
 import com.zbob.modules.carts.repository.CartRepository;
 import com.zbob.modules.inventory.entity.ProductVariant;
 import com.zbob.modules.inventory.repository.ProductVariantRepository;
+import com.zbob.modules.products.entity.ProductImage;
+import com.zbob.modules.products.repository.ProductImageRepository;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,11 +27,14 @@ public class CartService {
     private final CartRepository carts;
     private final CartItemRepository items;
     private final ProductVariantRepository variants;
+    private final ProductImageRepository images;
 
-    public CartService(CartRepository carts, CartItemRepository items, ProductVariantRepository variants) {
+    public CartService(CartRepository carts, CartItemRepository items, ProductVariantRepository variants,
+            ProductImageRepository images) {
         this.carts = carts;
         this.items = items;
         this.variants = variants;
+        this.images = images;
     }
 
     @Transactional(readOnly = true)
@@ -87,10 +94,17 @@ public class CartService {
     }
 
     private CartResponse toResponse(Long cartId) {
-        List<CartItemResponse> lines = items.findByCartIdOrderByIdAsc(cartId).stream().map(item -> {
+        List<CartItem> rows = items.findByCartIdOrderByIdAsc(cartId);
+        Map<Long, String> firstImage = new HashMap<>();
+        List<Long> productIds = rows.stream().map(item -> item.getVariant().getProduct().getId()).toList();
+        for (ProductImage image : images.findByProductIdInOrderByPositionAscIdAsc(productIds)) {
+            firstImage.putIfAbsent(image.getProduct().getId(), image.getUrl());
+        }
+        List<CartItemResponse> lines = rows.stream().map(item -> {
             ProductVariant v = item.getVariant();
             int price = v.getProduct().getPriceCents();
             return new CartItemResponse(item.getId(), v.getId(), v.getProduct().getName(), v.getProduct().getSlug(),
+                    firstImage.get(v.getProduct().getId()),
                     v.getSize(), v.getColor(), item.getQuantity(), price, price * item.getQuantity(),
                     v.getProduct().isPublished() && v.getStockQuantity() >= item.getQuantity());
         }).toList();
