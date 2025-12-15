@@ -57,6 +57,13 @@ export interface ProductSummary {
   published: boolean;
 }
 
+export interface PublicVariantOption {
+  variantId: number;
+  size: string;
+  color: string;
+  inStock: boolean;
+}
+
 /** Storefront product page. Reports only whether it is in stock. */
 export interface PublicProduct {
   id: number;
@@ -72,10 +79,11 @@ export interface PublicProduct {
   inStock: boolean;
   category: Category;
   images: ProductImage[];
+  options: PublicVariantOption[];
 }
 
 /** Full shape used by the admin product editor. */
-export interface AdminProduct extends PublicProduct {
+export interface AdminProduct extends Omit<PublicProduct, "options"> {
   published: boolean;
   brand: Brand | null;
   variants: ProductVariant[];
