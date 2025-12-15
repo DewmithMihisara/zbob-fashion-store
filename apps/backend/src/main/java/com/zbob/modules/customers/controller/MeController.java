@@ -2,6 +2,7 @@ package com.zbob.modules.customers.controller;
 
 import com.zbob.modules.customers.dto.AddressRequest;
 import com.zbob.modules.customers.dto.AddressResponse;
+import com.zbob.modules.customers.dto.ChangePasswordRequest;
 import com.zbob.modules.customers.dto.ProfileRequest;
 import com.zbob.modules.customers.service.CustomerService;
 import com.zbob.modules.users.dto.UserResponse;
@@ -40,6 +41,12 @@ public class MeController {
     @PutMapping
     UserResponse updateProfile(@AuthenticationPrincipal AuthenticatedUser user, @Valid @RequestBody ProfileRequest request) {
         return customers.updateProfile(user.id(), request.fullName());
+    }
+
+    @PutMapping("/password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void changePassword(@AuthenticationPrincipal AuthenticatedUser user, @Valid @RequestBody ChangePasswordRequest request) {
+        customers.changePassword(user.id(), request);
     }
 
     @GetMapping("/addresses")

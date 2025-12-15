@@ -1,10 +1,12 @@
 package com.zbob.modules.customers.service;
 
 import com.zbob.common.dto.PageResponse;
+import com.zbob.exception.BadRequestException;
 import com.zbob.exception.ConflictException;
 import com.zbob.exception.ResourceNotFoundException;
 import com.zbob.modules.customers.dto.AddressRequest;
 import com.zbob.modules.customers.dto.AddressResponse;
+import com.zbob.modules.customers.dto.ChangePasswordRequest;
 import com.zbob.modules.customers.dto.CreateCustomerRequest;
 import com.zbob.modules.customers.dto.UpdateCustomerRequest;
 import com.zbob.modules.customers.entity.CustomerAddress;
@@ -48,6 +50,15 @@ public class CustomerService {
         User user = findUser(userId);
         user.setFullName(fullName.trim());
         return UserMapper.toResponse(user);
+    }
+
+    @Transactional
+    public void changePassword(Long userId, ChangePasswordRequest request) {
+        User user = findUser(userId);
+        if (!encoder.matches(request.currentPassword(), user.getPasswordHash())) {
+            throw new BadRequestException("Your current password is not correct");
+        }
+        user.setPasswordHash(encoder.encode(request.newPassword()));
     }
 
     @Transactional(readOnly = true)
