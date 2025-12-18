@@ -4,7 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { LinkButton } from "@/components/ui/Button";
-import { PlusIcon, SearchIcon } from "@/components/ui/icons";
+import { useCart } from "@/components/cart/CartProvider";
+import { BagIcon, PlusIcon, SearchIcon, UserIcon } from "@/components/ui/icons";
+import { useCustomerSession } from "@/hooks/useCustomerSession";
 import { navLinks } from "@/lib/site";
 import { Wordmark } from "./Wordmark";
 
@@ -13,6 +15,8 @@ const HERO_PAGES = new Set(["/", "/shop", "/about", "/blog", "/contact"]);
 
 export function Header() {
   const pathname = usePathname();
+  const session = useCustomerSession();
+  const { count } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -48,6 +52,25 @@ export function Header() {
             className={`flex size-[37px] items-center justify-center rounded-full ${overHero ? "bg-paper/25 backdrop-blur-md" : "bg-paper"}`}
           >
             <SearchIcon />
+          </Link>
+          <Link
+            href={session ? "/account" : "/login"}
+            aria-label={session ? "Your account" : "Sign in"}
+            className={`flex size-[37px] items-center justify-center rounded-full ${overHero ? "bg-paper/25 backdrop-blur-md" : "bg-paper"}`}
+          >
+            <UserIcon />
+          </Link>
+          <Link
+            href="/cart"
+            aria-label={count > 0 ? `Cart, ${count} ${count === 1 ? "item" : "items"}` : "Cart"}
+            className={`relative flex size-[37px] items-center justify-center rounded-full ${overHero ? "bg-paper/25 backdrop-blur-md" : "bg-paper"}`}
+          >
+            <BagIcon />
+            {count > 0 && (
+              <span aria-hidden="true" className="absolute -top-1 -right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-accent px-1 text-[11px] font-medium text-paper">
+                {count > 99 ? "99+" : count}
+              </span>
+            )}
           </Link>
           <span className="hidden tablet:inline">
             <LinkButton href="/shop" variant={overHero ? "light" : "dark"}>
