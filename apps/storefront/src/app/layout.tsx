@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { CartProvider } from "@/components/cart/CartProvider";
 import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
@@ -15,12 +16,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${inter.variable} ${logoFace.variable}`}>
       <body>
-        <div className="sticky top-0 z-40 -mb-[71px]">
-          <AnnouncementBar />
-          <Header />
-        </div>
-        <main>{children}</main>
-        <Footer />
+        <CartProvider>
+          <div className="sticky top-0 z-40 -mb-[71px]">
+            <AnnouncementBar />
+            <Header />
+          </div>
+          <main>{children}</main>
+          <Footer />
+        </CartProvider>
       </body>
     </html>
   );
