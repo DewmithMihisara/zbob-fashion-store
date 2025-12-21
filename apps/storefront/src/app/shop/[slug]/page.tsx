@@ -5,6 +5,7 @@ import { CommunitySection } from "@/components/home/CommunitySection";
 import { OrderNowButton } from "@/components/product/OrderNowButton";
 import { Price } from "@/components/product/Price";
 import { ProductGallery } from "@/components/product/ProductGallery";
+import { ProductPurchase } from "@/components/product/ProductPurchase";
 import { TrustGrid } from "@/components/product/TrustGrid";
 import { CheckIcon, CubeIcon, WandIcon } from "@/components/ui/icons";
 import { Container } from "@/components/ui/SectionHeading";
@@ -52,7 +53,8 @@ export default async function ProductPage({ params }: Props) {
                 <Price cents={product.priceCents} wasCents={product.compareAtPriceCents} prefix="USD " className="text-[24px]" wasClassName="text-[20px]" />
               </div>
               <p className="mt-10 max-w-[440px] text-[18px] leading-[27px] font-medium text-muted">{product.description}</p>
-              <div className="mt-5">
+              <div className="mt-5 flex flex-col gap-3">
+                {product.inStock && <ProductPurchase slug={product.slug} options={product.options} />}
                 <OrderNowButton disabled={!product.inStock} />
               </div>
               <dl className="mt-auto pt-[58px]">
