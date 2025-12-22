@@ -13,10 +13,10 @@ export function ImagePlaceholder({
     <div
       role="img"
       aria-label={label ? `${label} (photo coming soon)` : "Photo coming soon"}
-      className={`flex size-full items-center justify-center select-none ${colors} ${className}`}
+      className={`@container flex size-full items-center justify-center select-none ${colors} ${className}`}
     >
       {tone === "light" && (
-        <span aria-hidden="true" className="font-logo text-[clamp(24px,5vw,48px)] uppercase">
+        <span aria-hidden="true" className="font-logo text-[clamp(12px,22cqw,48px)] uppercase">
           zbob
         </span>
       )}
