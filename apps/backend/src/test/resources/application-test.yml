@@ -4,6 +4,12 @@ spring:
     username: sa
     password: ""
 app:
+  # Generous limits, so tests sharing one application do not block each other. RateLimitApiTest uses low ones.
+  rate-limit:
+    login-per-ip: 10000
+    signup-per-ip: 10000
+    reset-per-ip: 10000
+    forms-per-ip: 10000
   storage:
     local-dir: target/test-uploads
   jwt:
