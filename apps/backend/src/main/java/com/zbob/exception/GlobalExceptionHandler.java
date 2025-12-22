@@ -41,6 +41,13 @@ public class GlobalExceptionHandler {
         return respond(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", e.getMessage());
     }
 
+    @ExceptionHandler(TooManyRequestsException.class)
+    ResponseEntity<ApiErrorResponse> tooManyRequests(TooManyRequestsException e) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header("Retry-After", String.valueOf(e.getRetryAfterSeconds()))
+                .body(new ApiErrorResponse(429, "TOO_MANY_REQUESTS", e.getMessage()));
+    }
+
     @ExceptionHandler(UncheckedIOException.class)
     ResponseEntity<ApiErrorResponse> storageFailed(UncheckedIOException e) {
         log.error("Image storage failed", e);
