@@ -74,13 +74,23 @@ test("about page figures come from the store", async ({ page }) => {
   await expect(page.getByText("10M+")).toHaveCount(0);
 });
 
-test("mobile header shows only search and menu", async ({ page }) => {
+test("mobile header shows only icons", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(STORE);
 
   await expect(page.getByRole("banner").getByRole("link", { name: "Shop all items" })).toBeHidden();
   await expect(page.getByRole("link", { name: "Search products" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Open menu" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Cart", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Sign in" })).toBeVisible();
+});
+
+test("the picker orders sizes naturally and never shows stock counts", async ({ page }) => {
+  await page.goto(`${STORE}/shop/field-pocket-cargo`);
+
+  const sizes = page.getByRole("group", { name: "Size" }).getByRole("button");
+  await expect(sizes).toHaveText(["S", "M", "L"]);
+  expect(await page.locator("main").innerText()).not.toMatch(/\d+ (left|in stock)/);
 });
 
 test("mobile menu opens and navigates", async ({ page }) => {
