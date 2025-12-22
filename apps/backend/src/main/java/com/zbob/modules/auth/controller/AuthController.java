@@ -25,8 +25,8 @@ public class AuthController {
 
     @PostMapping("/customer/register")
     @ResponseStatus(HttpStatus.CREATED)
-    AuthResponse register(@Valid @RequestBody RegisterRequest request) {
-        return auth.register(request);
+    AuthResponse register(@Valid @RequestBody RegisterRequest request, HttpServletRequest http) {
+        return auth.register(request, http.getRemoteAddr());
     }
 
     @PostMapping("/customer/login")

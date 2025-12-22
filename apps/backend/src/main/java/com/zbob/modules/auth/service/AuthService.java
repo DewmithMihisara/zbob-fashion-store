@@ -45,8 +45,9 @@ public class AuthService {
     }
 
     @Transactional
-    public AuthResponse register(RegisterRequest request) {
-        String email = request.email().trim().toLowerCase();
+    public AuthResponse register(RegisterRequest request, String ip) {
+        RateLimits.enforce(limits.signupPerIp().tryAcquire("signup:" + ip));
+        String email = request.email().trim().toLowerCase(Locale.ROOT);
         if (users.existsByEmailIgnoreCase(email)) {
             throw new ConflictException("An account with this email already exists");
         }
