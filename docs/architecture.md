@@ -47,12 +47,18 @@ Anything without a photo shows a neutral placeholder on the storefront. Uploads 
 
 Each size and colour of a product is a `product_variants` row with its own count. A product is in stock when any of its variants has stock above 0. The public API reports only that yes or no, never the counts.
 
+## Customer accounts and the cart
+
+Customers sign up at `/register` and manage their profile, password, addresses and order history under `/account`. The cart needs a login and is saved on the account, so it follows them between devices. Prices always come from the product on the server, never from the browser.
+
+The storefront keeps the customer's token in local storage so a login survives closing the browser. Any script running on the page could read it, so keep third-party scripts off the storefront. Tokens last 8 hours.
+
 ## Order Now and payments
 
-Order Now on the product page deliberately does nothing, because no payment gateway has been chosen. See `OrderNowButton.tsx`.
+Order Now on the product page deliberately does nothing, and the cart's checkout button is disabled, because no payment gateway has been chosen. See `OrderNowButton.tsx` and `CartView.tsx`. Customers only see orders that staff enter in the dashboard.
 
-The API for carts, orders and payments exists and is tested, but no storefront page uses it yet. To go live with payments:
+The API for placing and paying for orders exists and is tested. To go live with payments:
 
 1. Implement `PaymentGateway` in the backend for the chosen provider. Until one exists, starting a payment returns `501 PAYMENTS_NOT_CONFIGURED`.
-2. Build the size picker, cart and checkout pages on the storefront.
-3. Connect `OrderNowButton` to them.
+2. Build the checkout page, using saved addresses and `POST /orders`.
+3. Connect `OrderNowButton` and the cart's checkout button to it.

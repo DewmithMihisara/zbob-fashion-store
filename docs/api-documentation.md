@@ -17,7 +17,7 @@ Every error has the same shape:
 | Method | Path | Purpose |
 |---|---|---|
 | GET | `/products` | Published products. Filters: `category`, `badge`, plus `page`, `size`, `sort` |
-| GET | `/products/{slug}` | One published product |
+| GET | `/products/{slug}` | One published product, with its sizes and colours. Reports availability, never counts |
 | GET | `/categories`, `/categories/with-prices` | Categories, optionally with price ranges |
 | GET | `/brands` | Brands |
 | GET | `/blog`, `/blog/{slug}` | Published posts. Filter: `topic` |
@@ -32,6 +32,7 @@ Every error has the same shape:
 | Method | Path | Purpose |
 |---|---|---|
 | GET, PUT | `/me` | Profile |
+| PUT | `/me/password` | Change password, given the current one |
 | GET, POST, PUT, DELETE | `/me/addresses` | Delivery addresses |
 | GET, POST, PATCH, DELETE | `/cart`, `/cart/items` | Cart |
 | GET, POST | `/orders` | Place and list own orders |
