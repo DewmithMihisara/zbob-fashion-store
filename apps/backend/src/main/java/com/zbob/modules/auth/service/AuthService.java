@@ -6,6 +6,7 @@ import com.zbob.exception.InvalidCredentialsException;
 import com.zbob.modules.auth.dto.request.LoginRequest;
 import com.zbob.modules.auth.dto.request.RegisterRequest;
 import com.zbob.modules.auth.dto.response.AuthResponse;
+import com.zbob.modules.notifications.EmailService;
 import com.zbob.modules.users.entity.Role;
 import com.zbob.modules.users.entity.User;
 import com.zbob.modules.users.repository.UserRepository;
@@ -23,14 +24,16 @@ public class AuthService {
     private final PasswordEncoder encoder;
     private final JwtService jwt;
     private final RateLimits limits;
+    private final EmailService emails;
     /** Compared against when the email is unknown, so both failure paths do the same hashing work. */
     private final String dummyHash;
 
-    public AuthService(UserRepository users, PasswordEncoder encoder, JwtService jwt, RateLimits limits) {
+    public AuthService(UserRepository users, PasswordEncoder encoder, JwtService jwt, RateLimits limits, EmailService emails) {
         this.users = users;
         this.encoder = encoder;
         this.jwt = jwt;
         this.limits = limits;
+        this.emails = emails;
         this.dummyHash = encoder.encode("timing-equalizer");
     }
 
@@ -52,6 +55,7 @@ public class AuthService {
             throw new ConflictException("An account with this email already exists");
         }
         User user = users.save(new User(email, encoder.encode(request.password()), request.fullName().trim(), Role.CUSTOMER));
+        emails.welcome(user);
         return toResponse(user);
     }
 
