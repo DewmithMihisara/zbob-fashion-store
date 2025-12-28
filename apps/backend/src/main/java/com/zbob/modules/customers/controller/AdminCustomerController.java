@@ -1,6 +1,7 @@
 package com.zbob.modules.customers.controller;
 
 import com.zbob.common.dto.PageResponse;
+import com.zbob.modules.auth.service.PasswordResetService;
 import com.zbob.modules.customers.dto.CreateCustomerRequest;
 import com.zbob.modules.customers.dto.UpdateCustomerRequest;
 import com.zbob.modules.customers.service.CustomerService;
@@ -28,9 +29,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminCustomerController {
 
     private final CustomerService customers;
+    private final PasswordResetService passwordReset;
 
-    public AdminCustomerController(CustomerService customers) {
+    public AdminCustomerController(CustomerService customers, PasswordResetService passwordReset) {
         this.customers = customers;
+        this.passwordReset = passwordReset;
+    }
+
+    @PostMapping("/{id}/password-reset")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    void sendPasswordReset(@PathVariable Long id) {
+        passwordReset.sendToCustomer(id);
     }
 
     @GetMapping
