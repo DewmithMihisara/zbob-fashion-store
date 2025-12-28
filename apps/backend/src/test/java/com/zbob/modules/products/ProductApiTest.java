@@ -160,6 +160,12 @@ class ProductApiTest {
     }
 
     @Test
+    @WithMockUser(roles = "STAFF")
+    void unknownSortFieldIsABadRequest() throws Exception {
+        mvc.perform(get(ADMIN_URL).param("sort", "nonsense")).andExpect(status().isBadRequest());
+    }
+
+    @Test
     void anonymousCannotUseAdminApi() throws Exception {
         mvc.perform(get(ADMIN_URL)).andExpect(status().isUnauthorized());
     }

@@ -5,6 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -39,6 +40,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidCredentialsException.class)
     ResponseEntity<ApiErrorResponse> invalidCredentials(InvalidCredentialsException e) {
         return respond(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", e.getMessage());
+    }
+
+    @ExceptionHandler(PropertyReferenceException.class)
+    ResponseEntity<ApiErrorResponse> unknownSortField(PropertyReferenceException e) {
+        return respond(HttpStatus.BAD_REQUEST, "BAD_REQUEST", "Unknown sort field: " + e.getPropertyName());
     }
 
     @ExceptionHandler(TooManyRequestsException.class)
