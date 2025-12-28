@@ -4,6 +4,7 @@ import com.zbob.common.dto.PageResponse;
 import com.zbob.exception.BadRequestException;
 import com.zbob.exception.ConflictException;
 import com.zbob.exception.ResourceNotFoundException;
+import com.zbob.modules.auth.repository.PasswordResetTokenRepository;
 import com.zbob.modules.customers.dto.AddressRequest;
 import com.zbob.modules.customers.dto.AddressResponse;
 import com.zbob.modules.customers.dto.ChangePasswordRequest;
@@ -11,12 +12,14 @@ import com.zbob.modules.customers.dto.CreateCustomerRequest;
 import com.zbob.modules.customers.dto.UpdateCustomerRequest;
 import com.zbob.modules.customers.entity.CustomerAddress;
 import com.zbob.modules.customers.repository.CustomerAddressRepository;
+import com.zbob.modules.notifications.EmailService;
 import com.zbob.modules.orders.repository.OrderRepository;
 import com.zbob.modules.users.dto.UserResponse;
 import com.zbob.modules.users.entity.Role;
 import com.zbob.modules.users.entity.User;
 import com.zbob.modules.users.mapper.UserMapper;
 import com.zbob.modules.users.repository.UserRepository;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import org.springframework.data.domain.Pageable;
@@ -31,13 +34,17 @@ public class CustomerService {
     private final CustomerAddressRepository addresses;
     private final OrderRepository orders;
     private final PasswordEncoder encoder;
+    private final PasswordResetTokenRepository resetTokens;
+    private final EmailService emails;
 
     public CustomerService(UserRepository users, CustomerAddressRepository addresses, OrderRepository orders,
-            PasswordEncoder encoder) {
+            PasswordEncoder encoder, PasswordResetTokenRepository resetTokens, EmailService emails) {
         this.users = users;
         this.addresses = addresses;
         this.orders = orders;
         this.encoder = encoder;
+        this.resetTokens = resetTokens;
+        this.emails = emails;
     }
 
     @Transactional(readOnly = true)
@@ -59,6 +66,8 @@ public class CustomerService {
             throw new BadRequestException("Your current password is not correct");
         }
         user.setPasswordHash(encoder.encode(request.newPassword()));
+        resetTokens.invalidateForUser(userId, Instant.now());
+        emails.passwordChanged(user);
     }
 
     @Transactional(readOnly = true)
