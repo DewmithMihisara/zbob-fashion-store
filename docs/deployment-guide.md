@@ -48,6 +48,28 @@ The code for Google Cloud Storage is in place but has not run against a real buc
 
 The API saves each photo's public `https://storage.googleapis.com/...` URL in the database. Photos uploaded earlier to local disk keep their old URLs, so upload those again after switching.
 
+## Email
+
+Until you choose an email provider, the API writes every email to its log instead of sending it. That includes password reset links, so never run production like that.
+
+To send real email through any SMTP service, such as Amazon SES, SendGrid, Mailgun or Google Workspace, set:
+
+| Variable | Notes |
+|---|---|
+| `MAIL_PROVIDER` | `smtp` |
+| `MAIL_FROM` | The sender, for example `zbob <hello@yourdomain.com>`. The provider must allow this address |
+| `STOREFRONT_URL` | The public storefront address, used for links in emails |
+| `SPRING_MAIL_HOST`, `SPRING_MAIL_PORT`, `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD` | From your provider |
+| `SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH`, `SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE` | Usually both `true` |
+
+The store sends: a welcome email, password reset links (valid for one hour), a notice when a password changes, and order placed, shipped, delivered and cancelled updates.
+
+## Rate limits
+
+The API limits failed sign ins (5 per email and 50 per address every 15 minutes), sign ups (10 per address an hour), password reset requests, and the contact and newsletter forms. Over a limit it answers `429` with a `Retry-After` header. Each limit can be changed with an environment variable, such as `APP_RATELIMIT_LOGINPEREMAIL`.
+
+The counts are kept in each server's memory, so with several Cloud Run instances each counts separately, and a restart clears them. Keep the instance count low, or move the counts to a shared store such as Redis if traffic grows.
+
 ## Frontend environment
 
 | App | Variable | Notes |

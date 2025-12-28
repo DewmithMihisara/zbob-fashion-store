@@ -21,4 +21,4 @@ pnpm --filter @zbob/e2e exec playwright install chromium
 pnpm --filter @zbob/e2e e2e
 ```
 
-The API must run with the `dev` profile (the default) so the demo products exist.
+The API must run with the `dev` profile (the default) so the demo products exist. The specs create many accounts from one address, so also start the API with `APP_RATELIMIT_SIGNUPPERIP=10000` and `APP_RATELIMIT_FORMSPERIP=10000`.
