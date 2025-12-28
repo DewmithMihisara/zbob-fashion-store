@@ -18,4 +18,13 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     long countByApprovedTrue();
 
     long countByApprovedFalse();
+
+    Page<Review> findByProductIdAndApprovedTrue(Long productId, Pageable pageable);
+
+    @Query("select coalesce(avg(r.rating), 0) from Review r where r.approved = true and r.productId = :productId")
+    double averageApprovedRatingForProduct(Long productId);
+
+    long countByProductIdAndApprovedTrue(Long productId);
+
+    boolean existsByProductIdAndUserId(Long productId, Long userId);
 }
