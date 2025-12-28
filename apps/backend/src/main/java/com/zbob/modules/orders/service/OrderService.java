@@ -13,6 +13,7 @@ import com.zbob.modules.customers.entity.CustomerAddress;
 import com.zbob.modules.customers.repository.CustomerAddressRepository;
 import com.zbob.modules.inventory.entity.ProductVariant;
 import com.zbob.modules.inventory.repository.ProductVariantRepository;
+import com.zbob.modules.notifications.EmailService;
 import com.zbob.modules.orders.dto.AdminCreateOrderRequest;
 import com.zbob.modules.orders.dto.CreateOrderRequest;
 import com.zbob.modules.orders.dto.OrderItemResponse;
@@ -58,10 +59,11 @@ public class OrderService {
     private final ProductVariantRepository variants;
     private final PromotionService promotions;
     private final UserRepository users;
+    private final EmailService emails;
 
     public OrderService(OrderRepository orders, OrderItemRepository orderItems, CartRepository carts,
             CartItemRepository cartItems, CustomerAddressRepository addresses, ShippingMethodRepository shippingMethods,
-            ProductVariantRepository variants, PromotionService promotions, UserRepository users) {
+            ProductVariantRepository variants, PromotionService promotions, UserRepository users, EmailService emails) {
         this.orders = orders;
         this.orderItems = orderItems;
         this.carts = carts;
@@ -71,6 +73,7 @@ public class OrderService {
         this.variants = variants;
         this.promotions = promotions;
         this.users = users;
+        this.emails = emails;
     }
 
     @Transactional
@@ -109,6 +112,7 @@ public class OrderService {
                     variant.getSize(), variant.getColor(), variant.getProduct().getPriceCents(), line.getQuantity()));
         }
         cartItems.deleteByCartId(cart.getId());
+        users.findById(userId).ifPresent(user -> emails.orderPlaced(user, order.getOrderNumber(), order.getTotalCents()));
         return toResponse(order);
     }
 
@@ -146,6 +150,7 @@ public class OrderService {
             orderItems.save(new OrderItem(order.getId(), variant.getId(), variant.getProduct().getName(), variant.getSku(),
                     variant.getSize(), variant.getColor(), variant.getProduct().getPriceCents(), quantity));
         }
+        emails.orderPlaced(customer, order.getOrderNumber(), order.getTotalCents());
         return toResponse(order);
     }
 
@@ -211,6 +216,10 @@ public class OrderService {
             }
         }
         order.setStatus(next);
+        if (next != OrderStatus.PAID) {
+            users.findById(order.getUserId()).ifPresent(user ->
+                    emails.orderStatusChanged(user, order.getOrderNumber(), next.name().toLowerCase(Locale.ROOT)));
+        }
         return toResponse(order);
     }
 
