@@ -60,9 +60,15 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<ProductSummaryResponse> listPublished(String category, ProductBadge badge, Pageable pageable) {
-        Specification<Product> spec = published().and(inCategory(category)).and(hasBadge(badge));
+    public PageResponse<ProductSummaryResponse> listPublished(String category, ProductBadge badge, String search, Pageable pageable) {
+        Specification<Product> spec = published().and(inCategory(category)).and(hasBadge(badge)).and(nameContains(search));
         return summaries(products.findAll(spec, pageable));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<ProductSummaryResponse> summarize(Page<Product> page) {
+        return summaries(page);
     }
 
     @Override
