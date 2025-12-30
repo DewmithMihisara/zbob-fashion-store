@@ -7,6 +7,8 @@ import com.zbob.exception.ResourceNotFoundException;
 import com.zbob.modules.products.entity.Product;
 import com.zbob.modules.products.repository.ProductRepository;
 import com.zbob.modules.reviews.dto.CustomerReviewRequest;
+import com.zbob.modules.reviews.dto.ProductReviewsResponse;
+import com.zbob.modules.reviews.dto.PublicReviewResponse;
 import com.zbob.modules.reviews.dto.ReviewRequest;
 import com.zbob.modules.reviews.dto.ReviewResponse;
 import com.zbob.modules.reviews.dto.ReviewSummaryResponse;
@@ -44,6 +46,18 @@ public class ReviewService {
                 Math.round(reviews.averageApprovedRating() * 10) / 10.0,
                 reviews.countByApprovedTrue(),
                 latest.getContent().stream().map(ReviewService::toResponse).toList());
+    }
+
+    @Transactional(readOnly = true)
+    public ProductReviewsResponse forProduct(String slug, Pageable pageable) {
+        Product product = products.findBySlugAndPublishedTrue(slug)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", slug));
+        var page = reviews.findByProductIdAndApprovedTrue(product.getId(), pageable);
+        return new ProductReviewsResponse(
+                Math.round(reviews.averageApprovedRatingForProduct(product.getId()) * 10) / 10.0,
+                reviews.countByProductIdAndApprovedTrue(product.getId()),
+                PageResponse.of(page, r -> new PublicReviewResponse(r.getId(), r.getAuthorName(), r.getHeadline(),
+                        r.getBody(), r.getRating(), r.getCreatedAt())));
     }
 
     /** Customer reviews wait for approval and take the author's name from their account. */
