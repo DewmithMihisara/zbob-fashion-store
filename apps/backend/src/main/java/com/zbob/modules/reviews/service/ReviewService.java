@@ -2,6 +2,7 @@ package com.zbob.modules.reviews.service;
 
 import com.zbob.common.dto.PageResponse;
 import com.zbob.exception.BadRequestException;
+import com.zbob.exception.ConflictException;
 import com.zbob.exception.ResourceNotFoundException;
 import com.zbob.modules.products.entity.Product;
 import com.zbob.modules.products.repository.ProductRepository;
@@ -49,8 +50,11 @@ public class ReviewService {
     @Transactional
     public ReviewResponse submit(Long userId, CustomerReviewRequest request) {
         User user = users.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", userId));
-        if (!products.existsById(request.productId())) {
-            throw new BadRequestException("Unknown product: " + request.productId());
+        Product product = products.findById(request.productId())
+                .filter(Product::isPublished)
+                .orElseThrow(() -> new BadRequestException("Unknown product: " + request.productId()));
+        if (reviews.existsByProductIdAndUserId(product.getId(), userId)) {
+            throw new ConflictException("You have already reviewed this product");
         }
         Review review = new Review(user.getFullName(), request.headline(), request.body(), request.rating());
         review.setUserId(userId);
