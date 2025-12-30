@@ -3,6 +3,7 @@ package com.zbob.modules.reviews.service;
 import com.zbob.common.dto.PageResponse;
 import com.zbob.exception.BadRequestException;
 import com.zbob.exception.ResourceNotFoundException;
+import com.zbob.modules.products.entity.Product;
 import com.zbob.modules.products.repository.ProductRepository;
 import com.zbob.modules.reviews.dto.CustomerReviewRequest;
 import com.zbob.modules.reviews.dto.ReviewRequest;
@@ -12,6 +13,10 @@ import com.zbob.modules.reviews.entity.Review;
 import com.zbob.modules.reviews.repository.ReviewRepository;
 import com.zbob.modules.users.entity.User;
 import com.zbob.modules.users.repository.UserRepository;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -56,7 +61,13 @@ public class ReviewService {
     @Transactional(readOnly = true)
     public PageResponse<ReviewResponse> listAdmin(Boolean approved, Pageable pageable) {
         var page = approved == null ? reviews.findAll(pageable) : reviews.findByApproved(approved, pageable);
-        return PageResponse.of(page, ReviewService::toResponse);
+        Map<Long, String> names = productNames(page.getContent());
+        return PageResponse.of(page, r -> toResponse(r, names.get(r.getProductId())));
+    }
+
+    private Map<Long, String> productNames(List<Review> page) {
+        List<Long> ids = page.stream().map(Review::getProductId).filter(Objects::nonNull).distinct().toList();
+        return products.findAllById(ids).stream().collect(Collectors.toMap(Product::getId, Product::getName));
     }
 
     @Transactional
@@ -92,7 +103,11 @@ public class ReviewService {
     }
 
     private static ReviewResponse toResponse(Review r) {
+        return toResponse(r, null);
+    }
+
+    private static ReviewResponse toResponse(Review r, String productName) {
         return new ReviewResponse(r.getId(), r.getAuthorName(), r.getAuthorTitle(), r.getHeadline(), r.getBody(),
-                r.getRating(), r.isApproved());
+                r.getRating(), r.isApproved(), r.getProductId(), productName, r.getCreatedAt());
     }
 }
