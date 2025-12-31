@@ -1,12 +1,14 @@
 package com.zbob.modules.inventory.controller;
 
 import com.zbob.common.dto.PageResponse;
+import com.zbob.modules.inventory.dto.request.BulkStockRequest;
 import com.zbob.modules.inventory.dto.request.StockUpdateRequest;
 import com.zbob.modules.inventory.dto.request.VariantRequest;
 import com.zbob.modules.inventory.dto.response.InventoryRowResponse;
 import com.zbob.modules.inventory.dto.response.VariantResponse;
 import com.zbob.modules.inventory.service.InventoryService;
 import jakarta.validation.Valid;
+import java.util.Map;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -37,6 +39,11 @@ public class AdminInventoryController {
             @RequestParam(defaultValue = "false") boolean lowStockOnly,
             @PageableDefault(size = 50, sort = {"product.name", "size", "color"}) Pageable pageable) {
         return inventory.list(lowStockOnly, pageable);
+    }
+
+    @PostMapping("/inventory/bulk")
+    Map<String, Integer> bulk(@Valid @RequestBody BulkStockRequest request) {
+        return Map.of("updated", inventory.bulkUpdateStock(request));
     }
 
     @GetMapping("/products/{productId}/variants")

@@ -1,8 +1,10 @@
 package com.zbob.modules.inventory.service.impl;
 
 import com.zbob.common.dto.PageResponse;
+import com.zbob.exception.BadRequestException;
 import com.zbob.exception.ConflictException;
 import com.zbob.exception.ResourceNotFoundException;
+import com.zbob.modules.inventory.dto.request.BulkStockRequest;
 import com.zbob.modules.inventory.dto.request.StockUpdateRequest;
 import com.zbob.modules.inventory.dto.request.VariantRequest;
 import com.zbob.modules.inventory.dto.response.InventoryRowResponse;
@@ -13,6 +15,8 @@ import com.zbob.modules.inventory.service.InventoryService;
 import com.zbob.modules.products.entity.Product;
 import com.zbob.modules.products.mapper.ProductMapper;
 import com.zbob.modules.products.repository.ProductRepository;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -95,6 +99,33 @@ public class InventoryServiceImpl implements InventoryService {
     @Transactional
     public void deleteVariant(Long variantId) {
         variants.delete(find(variantId));
+    }
+
+    @Override
+    @Transactional
+    public int bulkUpdateStock(BulkStockRequest request) {
+        List<Long> ids = request.variantIds().stream().distinct().toList();
+        List<ProductVariant> rows = variants.findAllById(ids);
+        if (rows.size() != ids.size()) {
+            throw new BadRequestException("Some of the chosen rows no longer exist. Reload the page and try again.");
+        }
+        if (request.mode() == BulkStockRequest.Mode.SET && request.amount() < 0) {
+            throw new BadRequestException("Stock can not be set below 0");
+        }
+        List<String> wouldGoNegative = new ArrayList<>();
+        for (ProductVariant row : rows) {
+            int next = request.mode() == BulkStockRequest.Mode.SET ? request.amount() : row.getStockQuantity() + request.amount();
+            if (next < 0) {
+                wouldGoNegative.add(row.getSku());
+            }
+        }
+        if (!wouldGoNegative.isEmpty()) {
+            throw new ConflictException("This would take stock below 0 for: " + String.join(", ", wouldGoNegative));
+        }
+        for (ProductVariant row : rows) {
+            row.setStockQuantity(request.mode() == BulkStockRequest.Mode.SET ? request.amount() : row.getStockQuantity() + request.amount());
+        }
+        return rows.size();
     }
 
     private ProductVariant find(Long id) {
