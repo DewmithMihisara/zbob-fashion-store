@@ -40,6 +40,9 @@ export function LoginForm() {
       <ErrorNotice message={error} />
       <FormField label="Email" type="email" required autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} />
       <FormField label="Password" type="password" required autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
+      <Link href="/forgot-password" className="-mt-2 self-end text-[15px] text-muted underline">
+        Forgot your password?
+      </Link>
       <button type="submit" disabled={busy} className={buttonClass("dark", "h-12 disabled:opacity-60")}>
         {busy ? "Signing in..." : "Sign in"}
       </button>
