@@ -42,6 +42,12 @@ export const BagIcon = (p: IconProps) => (
   </Icon>
 );
 
+export const HeartIcon = ({ filled, ...p }: IconProps & { filled?: boolean }) => (
+  <Icon fill={filled ? "currentColor" : "none"} {...p}>
+    <path d="M12 20s-7-4.400-7-10a4 4 0 0 1 7-2.600A4 4 0 0 1 19 10c0 5.600-7 10-7 10z" />
+  </Icon>
+);
+
 export const PlusIcon = (p: IconProps) => (
   <Icon {...p}>
     <path d="M12 5v14M5 12h14" />
