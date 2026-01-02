@@ -5,6 +5,7 @@ import type {
   Page,
   ProductBadge,
   ProductSummary,
+  ProductReviews,
   PublicProduct,
   ReviewSummary,
   SiteMedia,
@@ -50,8 +51,16 @@ function query(params: Record<string, string | number | undefined>): string {
   return text ? `?${text}` : "";
 }
 
-export function getProducts(options: { category?: string; badge?: ProductBadge; size?: number } = {}) {
+export type ShopOrder = "newest" | "price-asc" | "price-desc" | "name";
+
+export function getProducts(
+  options: { category?: string; badge?: ProductBadge; size?: number; page?: number; search?: string; order?: ShopOrder } = {},
+) {
   return get<Page<ProductSummary>>(`/products${query(options)}`);
+}
+
+export function getProductReviews(slug: string) {
+  return getOrNull<ProductReviews>(`/products/${encodeURIComponent(slug)}/reviews?size=1`);
 }
 
 export function getProduct(slug: string) {
