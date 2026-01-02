@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { Photo } from "@/components/ui/Photo";
+import { WishlistButton } from "@/components/wishlist/WishlistButton";
 import { Badge } from "./Badge";
 import { Price } from "./Price";
 
@@ -14,6 +15,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
 
   return (
     <article>
+      <div className="relative">
       <Link href={`/shop/${product.slug}`} className="group relative block aspect-[373/420] overflow-hidden rounded-card bg-tile">
         <Photo
           src={imageUrl}
@@ -32,6 +34,8 @@ export function ProductCard({ product }: { product: ProductSummary }) {
           </span>
         )}
       </Link>
+        <WishlistButton productId={product.id} productName={product.name} className="absolute right-[14px] bottom-[14px]" />
+      </div>
       <div className="mt-[18px] flex items-center justify-between gap-3">
         <div className="min-w-0">
           <h3 className="truncate text-[17px] leading-[24px] tracking-tight-2">
