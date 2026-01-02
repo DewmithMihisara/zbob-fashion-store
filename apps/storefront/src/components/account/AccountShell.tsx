@@ -11,6 +11,7 @@ const TABS = [
   { href: "/account", label: "Profile" },
   { href: "/account/addresses", label: "Addresses" },
   { href: "/account/orders", label: "Orders" },
+  { href: "/account/wishlist", label: "Wishlist" },
 ];
 
 /** Sends signed out visitors to sign in. A convenience only: the API protects the data itself. */
