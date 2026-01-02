@@ -3,6 +3,7 @@ package com.zbob.modules.auth.service;
 import com.zbob.common.ratelimit.RateLimits;
 import com.zbob.exception.ConflictException;
 import com.zbob.exception.InvalidCredentialsException;
+import com.zbob.modules.activity.ActivityService;
 import com.zbob.modules.auth.dto.request.LoginRequest;
 import com.zbob.modules.auth.dto.request.RegisterRequest;
 import com.zbob.modules.auth.dto.response.AuthResponse;
@@ -25,15 +26,18 @@ public class AuthService {
     private final JwtService jwt;
     private final RateLimits limits;
     private final EmailService emails;
+    private final ActivityService activity;
     /** Compared against when the email is unknown, so both failure paths do the same hashing work. */
     private final String dummyHash;
 
-    public AuthService(UserRepository users, PasswordEncoder encoder, JwtService jwt, RateLimits limits, EmailService emails) {
+    public AuthService(UserRepository users, PasswordEncoder encoder, JwtService jwt, RateLimits limits, EmailService emails,
+            ActivityService activity) {
         this.users = users;
         this.encoder = encoder;
         this.jwt = jwt;
         this.limits = limits;
         this.emails = emails;
+        this.activity = activity;
         this.dummyHash = encoder.encode("timing-equalizer");
     }
 
@@ -44,7 +48,15 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public AuthResponse loginBackOffice(LoginRequest request, String ip) {
-        return login(request, ip, Role::isBackOffice);
+        String email = request.email().trim().toLowerCase(Locale.ROOT);
+        try {
+            AuthResponse response = login(request, ip, Role::isBackOffice);
+            activity.record(users.findByEmailIgnoreCase(email).map(User::getId).orElse(null), email, "SIGN_IN", "Signed in", 200);
+            return response;
+        } catch (InvalidCredentialsException e) {
+            activity.record(null, email, "SIGN_IN_FAILED", "Failed sign in from " + ip, 401);
+            throw e;
+        }
     }
 
     @Transactional
