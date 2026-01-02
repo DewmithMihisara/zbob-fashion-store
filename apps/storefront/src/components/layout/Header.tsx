@@ -47,7 +47,7 @@ export function Header() {
         </nav>
         <div className="flex items-center gap-[10px] justify-self-end">
           <Link
-            href="/shop"
+            href="/shop#search"
             aria-label="Search products"
             className={`flex size-[37px] items-center justify-center rounded-full ${overHero ? "bg-paper/25 backdrop-blur-md" : "bg-paper"}`}
           >
