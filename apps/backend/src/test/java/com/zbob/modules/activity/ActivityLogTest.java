@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.zbob.modules.brands.repository.BrandRepository;
 import com.zbob.modules.users.entity.Role;
 import com.zbob.modules.users.entity.User;
 import com.zbob.modules.users.repository.UserRepository;
@@ -37,9 +38,13 @@ class ActivityLogTest {
     @Autowired
     private JwtService jwt;
 
+    @Autowired
+    private BrandRepository brands;
+
     private User staff;
     private User admin;
     private long before;
+    private String brandName;
 
     @BeforeEach
     void setUp() {
@@ -47,6 +52,7 @@ class ActivityLogTest {
         staff = users.save(new User("act-staff-" + n + "@zbob.test", "hash", "Act Staff", Role.STAFF));
         admin = users.save(new User("act-admin-" + n + "@zbob.test", "hash", "Act Admin", Role.ADMIN));
         before = entries.count();
+        brandName = "Activity Brand " + n;
     }
 
     @AfterEach
@@ -56,6 +62,7 @@ class ActivityLogTest {
                         || e.getActorName().contains("act-"))
                 .forEach(entries::delete);
         users.deleteAll(List.of(staff, admin));
+        brands.findAll().stream().filter(b -> b.getName().equals(brandName)).forEach(brands::delete);
     }
 
     private String bearer(User user) {
@@ -69,7 +76,7 @@ class ActivityLogTest {
     @Test
     void recordsAChangeWithTheActorsName() throws Exception {
         mvc.perform(post("/api/v1/admin/brands").header("Authorization", bearer(staff)).contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"Activity Brand " + System.nanoTime() + "\"}"))
+                        .content("{\"name\":\"" + brandName + "\"}"))
                 .andExpect(status().isCreated());
 
         assertThat(newEntries()).anySatisfy(e -> {
@@ -77,7 +84,6 @@ class ActivityLogTest {
             assertThat(e.getSummary()).isEqualTo("Added brands");
             assertThat(e.getAction()).isEqualTo("CREATE");
         });
-        users.findAll(); // keep the connection warm for cleanup
     }
 
     @Test
