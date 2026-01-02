@@ -97,6 +97,15 @@ export interface ContactMessage {
   receivedAt: string;
 }
 
+export interface ActivityEntry {
+  id: number;
+  actor: string;
+  action: string;
+  summary: string;
+  status: number;
+  at: string;
+}
+
 export interface Subscriber {
   id: number;
   email: string;

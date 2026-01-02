@@ -21,6 +21,24 @@ export interface Review {
   body: string;
   rating: number;
   approved: boolean;
+  productId: number | null;
+  productName: string | null;
+  createdAt: string;
+}
+
+export interface PublicReview {
+  id: number;
+  authorName: string;
+  headline: string;
+  body: string;
+  rating: number;
+  createdAt: string;
+}
+
+export interface ProductReviews {
+  averageRating: number;
+  reviewCount: number;
+  reviews: import("./api").Page<PublicReview>;
 }
 
 export interface ReviewSummary {
