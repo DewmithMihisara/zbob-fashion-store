@@ -11,7 +11,9 @@ import { ProductReviewsSection } from "@/components/reviews/ProductReviewsSectio
 import { WishlistButton } from "@/components/wishlist/WishlistButton";
 import { CheckIcon, CubeIcon, WandIcon } from "@/components/ui/icons";
 import { Container } from "@/components/ui/SectionHeading";
-import { getProduct, getSiteMedia } from "@/lib/api";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { getProduct, getProductReviews, getSiteMedia } from "@/lib/api";
+import { productJsonLd } from "@/lib/structured-data";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +21,16 @@ type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await getProduct((await params).slug);
-  return product ? { title: product.name, description: product.description } : { title: "Not found" };
+  if (!product) {
+    return { title: "Not found" };
+  }
+  const image = product.images[0]?.url;
+  return {
+    title: product.name,
+    description: product.description,
+    alternates: { canonical: `/shop/${product.slug}` },
+    openGraph: { title: product.name, description: product.description, url: `/shop/${product.slug}`, images: image ? [image] : undefined },
+  };
 }
 
 export default async function ProductPage({ params }: Props) {
@@ -27,6 +38,8 @@ export default async function ProductPage({ params }: Props) {
   if (!product) {
     notFound();
   }
+
+  const reviews = await getProductReviews(product.slug).catch(() => null);
 
   const details = [
     { icon: CubeIcon, label: "Material", value: product.material },
@@ -36,6 +49,7 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <>
+      <JsonLd data={productJsonLd(product, reviews)} />
       <section className="pt-[98px]">
         <Container>
           <div className="grid gap-[34px] tablet:grid-cols-[575fr_541fr]">
