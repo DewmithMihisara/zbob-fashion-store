@@ -7,7 +7,9 @@ import { ProductSection } from "@/components/home/ProductSection";
 import { ReviewsSection } from "@/components/home/ReviewsSection";
 import { StorySection } from "@/components/home/StorySection";
 import { CrownIcon, SparkleIcon } from "@/components/ui/icons";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { getBlogPosts, getCategories, getProducts, getReviews, getSiteMedia } from "@/lib/api";
+import { organizationJsonLd } from "@/lib/structured-data";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +26,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <JsonLd data={organizationJsonLd()} />
       <HomeHero photos={heroPhotos} />
       <ProductSection
         icon={<SparkleIcon size={14} />}
