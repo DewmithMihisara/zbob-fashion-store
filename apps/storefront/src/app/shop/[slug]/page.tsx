@@ -7,6 +7,8 @@ import { Price } from "@/components/product/Price";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductPurchase } from "@/components/product/ProductPurchase";
 import { TrustGrid } from "@/components/product/TrustGrid";
+import { ProductReviewsSection } from "@/components/reviews/ProductReviewsSection";
+import { WishlistButton } from "@/components/wishlist/WishlistButton";
 import { CheckIcon, CubeIcon, WandIcon } from "@/components/ui/icons";
 import { Container } from "@/components/ui/SectionHeading";
 import { getProduct, getSiteMedia } from "@/lib/api";
@@ -48,7 +50,10 @@ export default async function ProductPage({ params }: Props) {
                   {product.category.name}
                 </Link>
               </p>
-              <h1 className="mt-3 text-[34px] leading-[1.15] font-medium tracking-tight-3 tablet:text-[44px]">{product.name}</h1>
+              <div className="mt-3 flex items-start justify-between gap-4">
+                <h1 className="text-[34px] leading-[1.15] font-medium tracking-tight-3 tablet:text-[44px]">{product.name}</h1>
+                <WishlistButton productId={product.id} productName={product.name} className="mt-1 shrink-0 bg-tile" />
+              </div>
               <div className="mt-3">
                 <Price cents={product.priceCents} wasCents={product.compareAtPriceCents} prefix="USD " className="text-[24px]" wasClassName="text-[20px]" />
               </div>
@@ -73,6 +78,7 @@ export default async function ProductPage({ params }: Props) {
           <TrustGrid />
         </Container>
       </section>
+      <ProductReviewsSection slug={product.slug} productId={product.id} />
       <CommunitySection media={media} />
     </>
   );
