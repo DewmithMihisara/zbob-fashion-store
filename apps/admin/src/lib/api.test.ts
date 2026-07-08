@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { api, ApiRequestError } from "./api";
+import { api, ApiRequestError, fileNameFrom } from "./api";
 import { clearSession, getSession, setSession } from "./session";
 
 function respond(status: number, body?: unknown) {
@@ -59,6 +59,11 @@ describe("api", () => {
     await expect(api("/thing")).rejects.toThrow();
 
     expect(getSession()).toBeNull();
+  });
+
+  it("reads download file names", () => {
+    expect(fileNameFrom('attachment; filename="zbob-products-2026-11-07.csv"', "x.csv")).toBe("zbob-products-2026-11-07.csv");
+    expect(fileNameFrom(null, "x.csv")).toBe("x.csv");
   });
 
   it("explains network failures", async () => {

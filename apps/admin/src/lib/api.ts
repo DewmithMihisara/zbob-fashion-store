@@ -54,6 +54,35 @@ export async function api<T = void>(path: string, options: RequestOptions = {}):
   return (await response.json()) as T;
 }
 
+/** Reads the file name from a Content-Disposition header, falling back when there is none. */
+export function fileNameFrom(header: string | null, fallback: string): string {
+  const match = header?.match(/filename="?([^";]+)"?/i);
+  return match?.[1] ?? fallback;
+}
+
+/** Downloads a file that needs the login token, which a plain link can not send. */
+export async function downloadFile(path: string, fallbackName: string): Promise<void> {
+  const token = getSession()?.token;
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}${path}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  } catch {
+    throw new ApiRequestError(0, "Could not reach the server. Check your connection and try again.");
+  }
+  if (!response.ok) {
+    const body = (await response.json().catch(() => null)) as ApiError | null;
+    throw new ApiRequestError(response.status, body?.message ?? "The download failed.");
+  }
+  const url = URL.createObjectURL(await response.blob());
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileNameFrom(response.headers.get("Content-Disposition"), fallbackName);
+  document.body.append(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 export function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : "Something went wrong.";
 }
