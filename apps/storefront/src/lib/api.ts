@@ -75,7 +75,7 @@ export function getReviews() {
   return get<ReviewSummary>("/reviews");
 }
 
-export function getBlogPosts(options: { topic?: string; size?: number } = {}) {
+export function getBlogPosts(options: { topic?: string; size?: number; page?: number } = {}) {
   return get<Page<BlogPostSummary>>(`/blog${query(options)}`);
 }
 
