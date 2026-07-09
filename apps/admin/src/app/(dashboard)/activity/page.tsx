@@ -15,6 +15,7 @@ const ACTION_LABELS: Record<string, { label: string; tone: "neutral" | "good" | 
   UPDATE: { label: "Changed", tone: "neutral" },
   DELETE: { label: "Deleted", tone: "bad" },
   EXPORT: { label: "Exported", tone: "warn" },
+  RESET: { label: "Reset link", tone: "warn" },
   SIGN_IN: { label: "Signed in", tone: "neutral" },
   SIGN_IN_FAILED: { label: "Failed sign in", tone: "bad" },
 };

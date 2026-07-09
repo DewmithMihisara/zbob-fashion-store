@@ -16,6 +16,12 @@ public final class ActivityDescriber {
         if (path.startsWith(PREFIX + "exports/")) {
             return "EXPORT";
         }
+        if (path.endsWith("/bulk")) {
+            return "UPDATE";
+        }
+        if (path.endsWith("/password-reset")) {
+            return "RESET";
+        }
         return switch (method.toUpperCase(Locale.ROOT)) {
             case "POST" -> "CREATE";
             case "PUT", "PATCH" -> "UPDATE";
@@ -29,16 +35,29 @@ public final class ActivityDescriber {
         if (rest.startsWith("exports/")) {
             return "Exported " + rest.substring("exports/".length());
         }
+        if (rest.endsWith("/bulk")) {
+            return "Changed " + rest.substring(0, rest.length() - "/bulk".length()).replace('-', ' ') + " in bulk";
+        }
+        if (rest.endsWith("/password-reset")) {
+            return "Sent a password reset link for " + words(rest.substring(0, rest.length() - "/password-reset".length()));
+        }
         String verb = switch (action(method, path)) {
             case "CREATE" -> "Added";
             case "UPDATE" -> "Changed";
             case "DELETE" -> "Deleted";
             default -> method;
         };
+        return verb + " " + words(rest);
+    }
+
+    private static String words(String rest) {
         List<String> parts = Arrays.stream(rest.split("/")).filter(s -> !s.isBlank()).toList();
-        StringBuilder text = new StringBuilder(verb);
+        StringBuilder text = new StringBuilder();
         for (String part : parts) {
-            text.append(part.chars().allMatch(Character::isDigit) ? " #" + part : " " + part.replace('-', ' '));
+            if (!text.isEmpty()) {
+                text.append(' ');
+            }
+            text.append(part.chars().allMatch(Character::isDigit) ? "#" + part : part.replace('-', ' '));
         }
         return text.toString();
     }

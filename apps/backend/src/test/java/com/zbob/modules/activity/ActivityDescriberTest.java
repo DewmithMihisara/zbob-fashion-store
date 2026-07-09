@@ -15,6 +15,15 @@ class ActivityDescriberTest {
     }
 
     @Test
+    void describesBulkChangesAndResetLinks() {
+        assertThat(ActivityDescriber.action("POST", "/api/v1/admin/inventory/bulk")).isEqualTo("UPDATE");
+        assertThat(ActivityDescriber.summary("POST", "/api/v1/admin/inventory/bulk")).isEqualTo("Changed inventory in bulk");
+        assertThat(ActivityDescriber.action("POST", "/api/v1/admin/customers/5/password-reset")).isEqualTo("RESET");
+        assertThat(ActivityDescriber.summary("POST", "/api/v1/admin/customers/5/password-reset"))
+                .isEqualTo("Sent a password reset link for customers #5");
+    }
+
+    @Test
     void describesExports() {
         assertThat(ActivityDescriber.action("GET", "/api/v1/admin/exports/customers.csv")).isEqualTo("EXPORT");
         assertThat(ActivityDescriber.summary("GET", "/api/v1/admin/exports/customers.csv")).isEqualTo("Exported customers.csv");
