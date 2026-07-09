@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react";
 import { ErrorAlert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
+import { ExportButton } from "@/components/ui/ExportButton";
 import { CheckboxField, TextField } from "@/components/ui/Field";
 import { Modal } from "@/components/ui/Modal";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -61,7 +62,16 @@ export default function CustomersPage() {
 
   return (
     <>
-      <PageHeader title="Customers" description="A customer with orders can be disabled but not deleted." action={<Button onClick={() => setEditing("new")}>Add customer</Button>} />
+      <PageHeader
+        title="Customers"
+        description="A customer with orders can be disabled but not deleted."
+        action={
+          <span className="inline-flex items-start gap-2">
+            {session?.role === "ADMIN" && <ExportButton name="customers" />}
+            <Button onClick={() => setEditing("new")}>Add customer</Button>
+          </span>
+        }
+      />
       <ErrorAlert message={error ?? action.error} />
       <Table headers={["Name", "Email", "Joined", "Status", ""]}>
         {data?.content.map((customer) => (

@@ -5,6 +5,7 @@ import { useState, type FormEvent } from "react";
 import { ErrorAlert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
+import { ExportButton } from "@/components/ui/ExportButton";
 import { TextField } from "@/components/ui/Field";
 import { Modal } from "@/components/ui/Modal";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -12,6 +13,7 @@ import { Pagination } from "@/components/ui/Pagination";
 import { Cell, EmptyRow, Table } from "@/components/ui/Table";
 import { useAction } from "@/hooks/useAction";
 import { useData } from "@/hooks/useData";
+import { useSession } from "@/hooks/useSession";
 import { api } from "@/lib/api";
 
 function SubscriberForm({ subscriber, onDone }: { subscriber: Subscriber | null; onDone: () => void }) {
@@ -42,6 +44,7 @@ function SubscriberForm({ subscriber, onDone }: { subscriber: Subscriber | null;
 }
 
 export default function SubscribersPage() {
+  const session = useSession();
   const [page, setPage] = useState(0);
   const { data, error, reload } = useData<Page<Subscriber>>(`/admin/newsletter-subscribers?page=${page}`);
   const [editing, setEditing] = useState<Subscriber | "new" | null>(null);
@@ -49,7 +52,16 @@ export default function SubscribersPage() {
 
   return (
     <>
-      <PageHeader title="Subscribers" description="People who signed up for news from the website footer." action={<Button onClick={() => setEditing("new")}>Add subscriber</Button>} />
+      <PageHeader
+        title="Subscribers"
+        description="People who signed up for news from the website footer."
+        action={
+          <span className="inline-flex items-start gap-2">
+            {session?.role === "ADMIN" && <ExportButton name="subscribers" />}
+            <Button onClick={() => setEditing("new")}>Add subscriber</Button>
+          </span>
+        }
+      />
       <ErrorAlert message={error ?? remove.error} />
       <Table headers={["Email", "Subscribed", ""]}>
         {data?.content.map((subscriber) => (

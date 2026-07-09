@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ErrorAlert } from "@/components/ui/Alert";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
+import { ExportButton } from "@/components/ui/ExportButton";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Pagination } from "@/components/ui/Pagination";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -29,9 +30,12 @@ export default function OrdersPage() {
         title="Orders"
         description="Order Now on the website is not connected to a payment gateway yet, so no orders are created from it. Only cancelled orders can be deleted."
         action={
-          <Link href="/orders/new" className="inline-flex h-9 items-center rounded-lg bg-ink px-3 text-[13px] font-medium text-paper hover:bg-neutral-800">
-            Add order
-          </Link>
+          <span className="inline-flex items-start gap-2">
+            {session?.role === "ADMIN" && <ExportButton name="orders" />}
+            <Link href="/orders/new" className="inline-flex h-9 items-center rounded-lg bg-ink px-3 text-[13px] font-medium text-paper hover:bg-neutral-800">
+              Add order
+            </Link>
+          </span>
         }
       />
       <select
