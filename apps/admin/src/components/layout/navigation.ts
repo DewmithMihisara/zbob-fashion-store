@@ -13,7 +13,13 @@ export interface NavGroup {
 }
 
 export const navigation: NavGroup[] = [
-  { title: "Overview", items: [{ href: "/dashboard", label: "Dashboard" }] },
+  {
+    title: "Overview",
+    items: [
+      { href: "/dashboard", label: "Dashboard" },
+      { href: "/activity", label: "Activity", roles: ["ADMIN"] },
+    ],
+  },
   {
     title: "Catalog",
     items: [

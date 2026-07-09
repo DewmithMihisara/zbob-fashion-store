@@ -8,8 +8,10 @@ describe("navigationFor", () => {
     expect(labels("ADMIN")).toContain("Staff");
   });
 
-  it("hides staff management from staff", () => {
+  it("hides staff management and the activity log from staff", () => {
     expect(labels("STAFF")).not.toContain("Staff");
+    expect(labels("STAFF")).not.toContain("Activity");
+    expect(labels("ADMIN")).toContain("Activity");
   });
 
   it("always shows photos and stock", () => {
