@@ -25,7 +25,7 @@ test("setting all stock to 0 shows out of stock, and restoring it brings Order N
   await page.goto(`${STORE}/shop/${SLUG}`);
   const soldOut = page.getByRole("button", { name: "Out of stock" });
   await expect(soldOut).toBeDisabled();
-  await page.goto(`${STORE}/shop`);
+  await page.goto(`${STORE}/shop?search=Loop`);
   await expect(page.locator("article").filter({ hasText: PRODUCT }).getByText("Out of stock")).toBeVisible();
 
   await signIn(page);

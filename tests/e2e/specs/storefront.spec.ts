@@ -21,10 +21,8 @@ test("home page has no invented claims from the template", async ({ page }) => {
 
 test("shop filters by category", async ({ page }) => {
   await page.goto(`${STORE}/shop`);
-  const all = page.locator("article");
-  await expect(all.first()).toBeVisible();
-  const allCount = await all.count();
-  expect(allCount).toBeGreaterThanOrEqual(20); // demo products, plus any published by other specs
+  await expect(page.getByTestId("result-count")).toHaveText(/^\d+ products$/);
+  await expect(page.locator("article")).toHaveCount(12); // one page
 
   await page.getByRole("link", { name: "Children's Wear" }).click();
 
@@ -34,7 +32,7 @@ test("shop filters by category", async ({ page }) => {
 });
 
 test("product card opens the product page", async ({ page }) => {
-  await page.goto(`${STORE}/shop`);
+  await page.goto(`${STORE}/shop?search=Everyday`);
 
   await page.getByRole("link", { name: "Everyday Square Tee" }).first().click();
 

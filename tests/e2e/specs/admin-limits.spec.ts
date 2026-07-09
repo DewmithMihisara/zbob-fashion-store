@@ -22,12 +22,13 @@ test("the stock table moves between server pages", async ({ page }) => {
   await page.goto(`${ADMIN}/inventory`);
 
   await expect(page.getByText(/Page 1 of \d+/)).toBeVisible();
-  const firstPage = await page.getByRole("row").nth(1).innerText();
+  // Row 0 is the header and row 1 the "tick every row" helper, so row 2 is the first product.
+  const firstPage = await page.getByRole("row").nth(2).innerText();
 
   const response = page.waitForResponse((r) => r.url().includes("/admin/inventory") && r.url().includes("page=1"));
   await page.getByRole("button", { name: "Next" }).click();
   await response;
 
   await expect(page.getByText(/Page 2 of \d+/)).toBeVisible();
-  expect(await page.getByRole("row").nth(1).innerText()).not.toBe(firstPage);
+  expect(await page.getByRole("row").nth(2).innerText()).not.toBe(firstPage);
 });

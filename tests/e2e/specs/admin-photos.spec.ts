@@ -17,7 +17,7 @@ test("uploading a product photo replaces the placeholder, and deleting brings it
   await expect(page.locator(`img[alt="${PRODUCT}"]`)).toBeVisible();
   await expect(page.getByRole("img", { name: new RegExp(`${PRODUCT} \\(photo coming soon\\)`) })).toHaveCount(0);
 
-  await page.goto(`${STORE}/shop`);
+  await page.goto(`${STORE}/shop?search=Canvas`);
   await expect(page.locator(`article img[alt="${PRODUCT}"]`)).toBeVisible();
 
   await signIn(page);
