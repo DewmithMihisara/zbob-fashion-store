@@ -2,7 +2,7 @@
 
 import type { Page, UserAccount } from "@zbob/shared-types";
 import { useState, type FormEvent } from "react";
-import { ErrorAlert } from "@/components/ui/Alert";
+import { ErrorAlert, SavedAlert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import { ExportButton } from "@/components/ui/ExportButton";
@@ -59,6 +59,7 @@ export default function CustomersPage() {
   const { data, error, reload } = useData<Page<UserAccount>>(`/admin/customers?page=${page}`);
   const [editing, setEditing] = useState<UserAccount | "new" | null>(null);
   const action = useAction();
+  const [notice, setNotice] = useState<string | null>(null);
 
   return (
     <>
@@ -73,6 +74,7 @@ export default function CustomersPage() {
         }
       />
       <ErrorAlert message={error ?? action.error} />
+      <SavedAlert message={action.error ? null : notice} />
       <Table headers={["Name", "Email", "Joined", "Status", ""]}>
         {data?.content.map((customer) => (
           <tr key={customer.id}>
@@ -86,6 +88,18 @@ export default function CustomersPage() {
               <span className="inline-flex gap-1">
                 <Button variant="secondary" onClick={() => setEditing(customer)}>
                   Edit
+                </Button>
+                <Button
+                  variant="secondary"
+                  disabled={action.busy || !customer.active}
+                  title={customer.active ? undefined : "Enable the account first"}
+                  onClick={() =>
+                    action.run(() => api(`/admin/customers/${customer.id}/password-reset`, { method: "POST" })).then((ok) => {
+                      if (ok) setNotice(`Reset link sent to ${customer.email}.`);
+                    })
+                  }
+                >
+                  Send reset link
                 </Button>
                 {session?.role === "ADMIN" && (
                   <ConfirmButton confirmLabel="Yes" onConfirm={() => action.run(() => api(`/admin/customers/${customer.id}`, { method: "DELETE" })).then(reload)}>
