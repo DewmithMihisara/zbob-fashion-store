@@ -69,10 +69,11 @@ export default function ReviewsPage() {
     <>
       <PageHeader title="Reviews" description="Only approved reviews appear on the website, and only they count towards the rating." action={<Button onClick={() => setEditing("new")}>Add review</Button>} />
       <ErrorAlert message={error ?? action.error} />
-      <Table headers={["Customer", "Review", "Rating", "Status", ""]}>
+      <Table headers={["Customer", "Product", "Review", "Rating", "Status", ""]}>
         {data?.content.map((review) => (
           <tr key={review.id}>
             <Cell className="font-medium whitespace-nowrap">{review.authorName}</Cell>
+            <Cell className="text-muted">{review.productName ?? "Whole store"}</Cell>
             <Cell className="max-w-[360px]">
               <p className="font-medium">{review.headline}</p>
               <p className="line-clamp-2 text-muted">{review.body}</p>
@@ -93,7 +94,7 @@ export default function ReviewsPage() {
             </Cell>
           </tr>
         ))}
-        {data?.content.length === 0 && <EmptyRow columns={5}>No reviews yet.</EmptyRow>}
+        {data?.content.length === 0 && <EmptyRow columns={6}>No reviews yet.</EmptyRow>}
       </Table>
       <Pagination page={data} onChange={setPage} />
       {editing && (
