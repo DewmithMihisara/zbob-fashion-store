@@ -16,6 +16,7 @@ import { StockStatus } from "@/features/products/ProductVariants";
 import { useAction } from "@/hooks/useAction";
 import { useData } from "@/hooks/useData";
 import { api } from "@/lib/api";
+import { BulkStockBar } from "./BulkStockBar";
 import { VariantForm } from "./VariantForm";
 
 export function InventoryTable() {
@@ -25,7 +26,32 @@ export function InventoryTable() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [editing, setEditing] = useState<InventoryRow | "new" | null>(null);
   const remove = useAction();
-  const { data, error, loading, reload } = useData<Page<InventoryRow>>(`/admin/inventory?lowStockOnly=${lowOnly}&page=${page}`);
+  const path = `/admin/inventory?lowStockOnly=${lowOnly}&page=${page}`;
+  const { data, error, loading, reload } = useData<Page<InventoryRow>>(path);
+
+  // A selection belongs to the page it was made on, so changing page or filter starts afresh.
+  const [selection, setSelection] = useState<{ path: string; ids: Set<number> }>({ path, ids: new Set() });
+  const selected = selection.path === path ? selection.ids : new Set<number>();
+  const rows = data?.content ?? [];
+  const allTicked = rows.length > 0 && rows.every((row) => selected.has(row.variantId));
+
+  function toggle(id: number) {
+    const next = new Set(selected);
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    setSelection({ path, ids: next });
+  }
+
+  function toggleAll() {
+    setSelection({ path, ids: allTicked ? new Set() : new Set(rows.map((row) => row.variantId)) });
+  }
+
+  function clear() {
+    setSelection({ path, ids: new Set() });
+  }
 
   return (
     <>
@@ -40,10 +66,43 @@ export function InventoryTable() {
         />
         <Button onClick={() => setEditing("new")}>Add stock row</Button>
       </div>
+      {selected.size > 0 && (
+        <BulkStockBar
+          variantIds={[...selected]}
+          onClear={clear}
+          onDone={() => {
+            clear();
+            reload();
+          }}
+        />
+      )}
       <ErrorAlert message={error ?? saveError ?? remove.error} />
-      <Table headers={["Product", "SKU", "Size", "Colour", "In stock", "Status", ""]}>
-        {data?.content.map((row) => (
-          <tr key={row.variantId}>
+      <Table headers={["", "Product", "SKU", "Size", "Colour", "In stock", "Status", ""]}>
+        {rows.length > 0 && (
+          <tr className="bg-canvas">
+            <Cell>
+              <input type="checkbox" aria-label="Tick every row on this page" checked={allTicked} onChange={toggleAll} className="size-4 accent-black" />
+            </Cell>
+            <Cell className="text-[12px] text-muted">Tick rows to change their stock together</Cell>
+            <Cell />
+            <Cell />
+            <Cell />
+            <Cell />
+            <Cell />
+            <Cell />
+          </tr>
+        )}
+        {rows.map((row) => (
+          <tr key={row.variantId} className={selected.has(row.variantId) ? "bg-orange-50/40" : undefined}>
+            <Cell>
+              <input
+                type="checkbox"
+                aria-label={`Tick ${row.productName} ${row.size} ${row.color}`}
+                checked={selected.has(row.variantId)}
+                onChange={() => toggle(row.variantId)}
+                className="size-4 accent-black"
+              />
+            </Cell>
             <Cell>
               <Link href={`/products/${row.productId}`} className="font-medium hover:underline">
                 {row.productName}
@@ -77,8 +136,8 @@ export function InventoryTable() {
             </Cell>
           </tr>
         ))}
-        {data?.content.length === 0 && <EmptyRow columns={7}>{lowOnly ? "Nothing is low on stock." : "No stock yet."}</EmptyRow>}
-        {!data && loading && <EmptyRow columns={7}>Loading...</EmptyRow>}
+        {data?.content.length === 0 && <EmptyRow columns={8}>{lowOnly ? "Nothing is low on stock." : "No stock yet."}</EmptyRow>}
+        {!data && loading && <EmptyRow columns={8}>Loading...</EmptyRow>}
       </Table>
       <Pagination page={data} onChange={setPage} />
       {editing && (
