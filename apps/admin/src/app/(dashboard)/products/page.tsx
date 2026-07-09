@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ErrorAlert } from "@/components/ui/Alert";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
+import { ExportButton } from "@/components/ui/ExportButton";
 import { Cell, EmptyRow, Table } from "@/components/ui/Table";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Pagination } from "@/components/ui/Pagination";
@@ -37,9 +38,12 @@ export default function ProductsPage() {
         title="Products"
         description="Everything in the store. Open a product to change its details, photos and stock."
         action={
-          <Link href="/products/new" className="inline-flex h-9 items-center rounded-lg bg-ink px-3 text-[13px] font-medium text-paper hover:bg-neutral-800">
-            Add product
-          </Link>
+          <span className="inline-flex items-start gap-2">
+            <ExportButton name="products" />
+            <Link href="/products/new" className="inline-flex h-9 items-center rounded-lg bg-ink px-3 text-[13px] font-medium text-paper hover:bg-neutral-800">
+              Add product
+            </Link>
+          </span>
         }
       />
       <div className="mb-4 flex flex-wrap gap-2">
