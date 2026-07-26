@@ -7,7 +7,7 @@ function prices(texts: string[]): number[] {
 
 test("search finds products by name and says how many", async ({ page }) => {
   await page.goto(`${STORE}/shop`);
-  await page.getByLabel("Search products").fill("coat");
+  await page.getByRole("searchbox", { name: "Search products" }).fill("coat");
   await page.getByRole("button", { name: "Search" }).click();
 
   await expect(page).toHaveURL(/search=coat/);
@@ -28,8 +28,13 @@ test("sorting by price orders the cards and keeps the category", async ({ page }
   await page.getByLabel("Sort by").selectOption("price-asc");
 
   await expect(page).toHaveURL(/category=childrens-wear.*order=price-asc|order=price-asc.*category=childrens-wear/);
-  const shown = prices(await page.locator("article").evaluateAll((cards) => cards.map((c) => c.querySelector("span.font-medium")?.textContent ?? "")));
-  expect(shown).toEqual([...shown].sort((a, b) => a - b));
+  // The address changes before the new results arrive, so keep checking until they are in order.
+  await expect
+    .poll(async () => {
+      const shown = prices(await page.locator("article").evaluateAll((cards) => cards.map((c) => c.querySelector("h3 + span > span")?.textContent ?? "")));
+      return shown.length > 1 && shown.every((price, i) => i === 0 || shown[i - 1]! <= price);
+    })
+    .toBe(true);
 });
 
 test("page numbers move through the results", async ({ page }) => {
@@ -48,5 +53,5 @@ test("the header search opens the shop search box", async ({ page }) => {
   await page.goto(STORE);
   await page.getByRole("link", { name: "Search products" }).click();
   await expect(page).toHaveURL(/\/shop#search$/);
-  await expect(page.getByLabel("Search products")).toBeVisible();
+  await expect(page.getByRole("searchbox", { name: "Search products" })).toBeVisible();
 });
