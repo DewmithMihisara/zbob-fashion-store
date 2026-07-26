@@ -33,7 +33,7 @@ test("forgot password sends a link that sets a new password once", async ({ page
 
   const link = await resetLinkFor(email);
   await page.goto(`${STORE}${link}`);
-  await page.getByLabel("New password", { exact: true }).fill("brand-new-password");
+  await page.getByLabel(/^New password/).fill("brand-new-password");
   await page.getByLabel("Repeat new password").fill("brand-new-password");
   await page.getByRole("button", { name: "Save new password" }).click();
   await expect(page.getByRole("heading", { name: "Password changed" })).toBeVisible();
@@ -45,7 +45,7 @@ test("forgot password sends a link that sets a new password once", async ({ page
   await expect(page.getByRole("heading", { name: /^Hello/ })).toBeVisible();
 
   await page.goto(`${STORE}${link}`);
-  await page.getByLabel("New password", { exact: true }).fill("third-password");
+  await page.getByLabel(/^New password/).fill("third-password");
   await page.getByLabel("Repeat new password").fill("third-password");
   await page.getByRole("button", { name: "Save new password" }).click();
   await expect(page.getByTestId("form-error")).toContainText("invalid or has expired");
@@ -60,7 +60,7 @@ test("an unknown email gets the same answer", async ({ page }) => {
 
 test("mismatched new passwords are caught before sending", async ({ page }) => {
   await page.goto(`${STORE}/reset-password?token=anything`);
-  await page.getByLabel("New password", { exact: true }).fill("one-password");
+  await page.getByLabel(/^New password/).fill("one-password");
   await page.getByLabel("Repeat new password").fill("another-password");
   await page.getByRole("button", { name: "Save new password" }).click();
   await expect(page.getByTestId("form-error")).toHaveText("The two passwords do not match.");
