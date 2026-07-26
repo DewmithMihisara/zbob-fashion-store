@@ -37,6 +37,11 @@ describe("api", () => {
     expect(fetchMock.mock.calls[0]![1].headers["Content-Type"]).toBeUndefined();
   });
 
+  it("returns nothing for an accepted answer with no body", async () => {
+    vi.stubGlobal("fetch", respond(202));
+    await expect(api("/thing", { method: "POST" })).resolves.toBeUndefined();
+  });
+
   it("returns nothing for 204", async () => {
     vi.stubGlobal("fetch", respond(204));
     await expect(api("/thing", { method: "DELETE" })).resolves.toBeUndefined();

@@ -48,10 +48,9 @@ export async function api<T = void>(path: string, options: RequestOptions = {}):
     const body = (await response.json().catch(() => null)) as ApiError | null;
     throw new ApiRequestError(response.status, body?.message ?? "Something went wrong.", body?.fieldErrors);
   }
-  if (response.status === 204) {
-    return undefined as T;
-  }
-  return (await response.json()) as T;
+  // 202 and 204 answers, such as "reset link sent", have no body to read.
+  const text = await response.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }
 
 /** Reads the file name from a Content-Disposition header, falling back when there is none. */
