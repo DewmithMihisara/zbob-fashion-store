@@ -47,10 +47,9 @@ export async function customerApi<T = void>(path: string, options: RequestOption
     const body = (await response.json().catch(() => null)) as ApiError | null;
     throw new CustomerApiError(response.status, body?.message ?? "Something went wrong. Please try again.", body?.fieldErrors);
   }
-  if (response.status === 204) {
-    return undefined as T;
-  }
-  return (await response.json()) as T;
+  // 202 and 204 answers, such as "reset link sent", have no body to read.
+  const text = await response.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }
 
 export function customerErrorMessage(error: unknown): string {

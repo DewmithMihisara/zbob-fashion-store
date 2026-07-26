@@ -44,6 +44,12 @@ describe("customerApi", () => {
     expect(error.fieldErrors.quantity).toBe("Too many");
   });
 
+  it("accepts an accepted answer with no body", async () => {
+    vi.stubGlobal("fetch", respond(202));
+
+    await expect(customerApi("/auth/customer/password-reset", { method: "POST", json: {} })).resolves.toBeUndefined();
+  });
+
   it("signs out when the token is rejected", async () => {
     setCustomerSession({ token: "old", fullName: "Sam" });
     vi.stubGlobal("fetch", respond(401, { message: "Authentication required" }));
