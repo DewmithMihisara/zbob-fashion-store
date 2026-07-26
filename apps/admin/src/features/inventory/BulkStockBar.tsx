@@ -23,7 +23,7 @@ export function BulkStockBar({ variantIds, onDone, onClear }: { variantIds: numb
   }
 
   return (
-    <form onSubmit={submit} aria-label="Change stock for ticked rows" className="mb-4 flex flex-col gap-2 rounded-xl border border-ink bg-paper p-3">
+    <form onSubmit={submit} aria-label="Change stock for ticked rows" className="flex flex-col gap-2 rounded-xl border border-ink bg-paper p-3 shadow-lg">
       <div className="flex flex-wrap items-center gap-2 text-[13px]">
         <span className="font-medium">{variantIds.length} selected</span>
         <select

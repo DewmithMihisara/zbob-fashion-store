@@ -66,16 +66,6 @@ export function InventoryTable() {
         />
         <Button onClick={() => setEditing("new")}>Add stock row</Button>
       </div>
-      {selected.size > 0 && (
-        <BulkStockBar
-          variantIds={[...selected]}
-          onClear={clear}
-          onDone={() => {
-            clear();
-            reload();
-          }}
-        />
-      )}
       <ErrorAlert message={error ?? saveError ?? remove.error} />
       <Table headers={["", "Product", "SKU", "Size", "Colour", "In stock", "Status", ""]}>
         {rows.length > 0 && (
@@ -139,6 +129,19 @@ export function InventoryTable() {
         {data?.content.length === 0 && <EmptyRow columns={8}>{lowOnly ? "Nothing is low on stock." : "No stock yet."}</EmptyRow>}
         {!data && loading && <EmptyRow columns={8}>Loading...</EmptyRow>}
       </Table>
+      {/* Below the table and stuck to the bottom of the screen, so it stays reachable on a long page. */}
+      {selected.size > 0 && (
+        <div className="sticky bottom-4 z-10 mt-4">
+          <BulkStockBar
+            variantIds={[...selected]}
+            onClear={clear}
+            onDone={() => {
+              clear();
+              reload();
+            }}
+          />
+        </div>
+      )}
       <Pagination page={data} onChange={setPage} />
       {editing && (
         <Modal title={editing === "new" ? "Add stock row" : `Edit ${editing.sku}`} onClose={() => setEditing(null)}>
