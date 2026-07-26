@@ -63,6 +63,8 @@ public class SecurityConfig {
         config.setAllowedOrigins(properties.cors().allowedOrigins());
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        // Browsers hide other response headers from cross-site pages unless they are listed here.
+        config.setExposedHeaders(List.of("Content-Disposition", "Retry-After"));
         var source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", config);
         return source;
