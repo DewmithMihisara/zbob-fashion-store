@@ -10,5 +10,6 @@ public record InventoryRowResponse(
         String color,
         int stockQuantity,
         int lowStockThreshold,
-        boolean lowStock) {
+        boolean lowStock,
+        String colorHex) {
 }

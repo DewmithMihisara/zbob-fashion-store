@@ -41,7 +41,7 @@ public final class ProductMapper {
                 variants.stream().anyMatch(v -> v.getStockQuantity() > 0),
                 CategoryMapper.toResponse(p.getCategory()), images.stream().map(ProductMapper::toImage).toList(),
                 variants.stream()
-                        .map(v -> new PublicVariantOption(v.getId(), v.getSize(), v.getColor(), v.getStockQuantity() > 0))
+                        .map(v -> new PublicVariantOption(v.getId(), v.getSize(), v.getColor(), v.getStockQuantity() > 0, v.getColorHex()))
                         .toList());
     }
 
@@ -51,6 +51,6 @@ public final class ProductMapper {
 
     public static VariantResponse toVariant(ProductVariant v) {
         return new VariantResponse(v.getId(), v.getSku(), v.getSize(), v.getColor(), v.getStockQuantity(),
-                v.getLowStockThreshold(), v.isLowStock());
+                v.getLowStockThreshold(), v.isLowStock(), v.getColorHex());
     }
 }

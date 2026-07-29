@@ -33,6 +33,10 @@ public class ProductVariant extends BaseEntity {
     @Column(name = "low_stock_threshold", nullable = false)
     private int lowStockThreshold = 5;
 
+    /** Shown as the swatch colour on the storefront, e.g. #1F2A44. Optional. */
+    @Column(name = "color_hex", length = 7)
+    private String colorHex;
+
     protected ProductVariant() {
     }
 
@@ -86,6 +90,14 @@ public class ProductVariant extends BaseEntity {
 
     public void setLowStockThreshold(int lowStockThreshold) {
         this.lowStockThreshold = lowStockThreshold;
+    }
+
+    public String getColorHex() {
+        return colorHex;
+    }
+
+    public void setColorHex(String colorHex) {
+        this.colorHex = colorHex;
     }
 
     public boolean isLowStock() {

@@ -39,7 +39,7 @@ public class InventoryServiceImpl implements InventoryService {
         Page<ProductVariant> page = lowStockOnly ? variants.findLowStock(pageable) : variants.findAllPaged(pageable);
         return PageResponse.of(page, v -> new InventoryRowResponse(v.getId(), v.getProduct().getId(),
                 v.getProduct().getName(), v.getSku(), v.getSize(), v.getColor(), v.getStockQuantity(),
-                v.getLowStockThreshold(), v.isLowStock()));
+                v.getLowStockThreshold(), v.isLowStock(), v.getColorHex()));
     }
 
     @Override
@@ -65,6 +65,7 @@ public class InventoryServiceImpl implements InventoryService {
         ProductVariant variant = new ProductVariant(
                 product, request.sku(), request.size(), request.color(), request.stockQuantity());
         variant.setLowStockThreshold(request.lowStockThreshold());
+        variant.setColorHex(normalizeHex(request.colorHex()));
         return ProductMapper.toVariant(variants.save(variant));
     }
 
@@ -84,6 +85,7 @@ public class InventoryServiceImpl implements InventoryService {
         variant.setColor(request.color());
         variant.setStockQuantity(request.stockQuantity());
         variant.setLowStockThreshold(request.lowStockThreshold());
+        variant.setColorHex(normalizeHex(request.colorHex()));
         return ProductMapper.toVariant(variant);
     }
 
@@ -126,6 +128,10 @@ public class InventoryServiceImpl implements InventoryService {
             row.setStockQuantity(request.mode() == BulkStockRequest.Mode.SET ? request.amount() : row.getStockQuantity() + request.amount());
         }
         return rows.size();
+    }
+
+    private static String normalizeHex(String hex) {
+        return hex == null || hex.isBlank() ? null : hex.toUpperCase(java.util.Locale.ROOT);
     }
 
     private ProductVariant find(Long id) {
