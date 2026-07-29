@@ -11,4 +11,8 @@ describe("photoLimitProblem", () => {
     expect(photoLimitProblem(3, 3)).toContain("You can add 2 more");
     expect(photoLimitProblem(0, 6)).toContain("You can add 5 more");
   });
+
+  it("asks to delete one when the product is already full", () => {
+    expect(photoLimitProblem(5, 1)).toBe("A product can have at most 5 photos. Delete one first.");
+  });
 });

@@ -6,5 +6,6 @@ export function photoLimitProblem(current: number, adding: number): string | nul
     return null;
   }
   const room = MAX_PRODUCT_PHOTOS - current;
-  return `A product can have at most ${MAX_PRODUCT_PHOTOS} photos. You can add ${room} more.`;
+  const next = room > 0 ? `You can add ${room} more.` : "Delete one first.";
+  return `A product can have at most ${MAX_PRODUCT_PHOTOS} photos. ${next}`;
 }
