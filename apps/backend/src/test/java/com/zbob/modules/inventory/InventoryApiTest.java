@@ -83,6 +83,25 @@ class InventoryApiTest {
     }
 
     @Test
+    void storesAColourCodeAndShowsItOnTheProductPage() throws Exception {
+        mvc.perform(post(variantsUrl()).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"sku\":\"BT-NV\",\"size\":\"M\",\"color\":\"Navy\",\"stockQuantity\":2,\"lowStockThreshold\":1,\"colorHex\":\"#1f2a44\"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.colorHex").value("#1F2A44"));
+
+        variants.flush();
+        mvc.perform(get("/api/v1/products/boxy-tee")).andExpect(jsonPath("$.options[0].colorHex").value("#1F2A44"));
+    }
+
+    @Test
+    void refusesAnInvalidColourCode() throws Exception {
+        mvc.perform(post(variantsUrl()).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"sku\":\"BT-X\",\"size\":\"M\",\"color\":\"Navy\",\"stockQuantity\":2,\"lowStockThreshold\":1,\"colorHex\":\"navy\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fieldErrors.colorHex").value("Use a colour code like #1F2A44"));
+    }
+
+    @Test
     void negativeStockIsRejected() throws Exception {
         ProductVariant variant = variants.save(new ProductVariant(product, "BT-M", "M", "Black", 1));
 
