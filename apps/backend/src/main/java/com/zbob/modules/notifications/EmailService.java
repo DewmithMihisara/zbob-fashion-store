@@ -82,6 +82,32 @@ public class EmailService {
                 """.formatted(user.getFullName(), orderNumber, statusText, storefrontUrl));
     }
 
+    public void backInStock(String email, String productName, String size, String color, String slug) {
+        send(email, productName + " is back in stock", """
+                Hello,
+
+                Good news: %s in %s, %s is back in stock at zbob.
+                %s/shop/%s
+
+                We only send this once, and sizes can sell out again quickly.
+
+                The zbob team
+                """.formatted(productName, size, color, storefrontUrl, slug));
+    }
+
+    public void returnDecided(User user, String orderNumber, String decision, String note) {
+        String extra = note == null || note.isBlank() ? "" : "\nA note from our team: " + note + "\n";
+        send(user.getEmail(), "Your return for order " + orderNumber + " was " + decision, """
+                Hi %s,
+
+                Your return request for order %s was %s.
+                %s
+                You can see the details at %s/account/orders
+
+                The zbob team
+                """.formatted(user.getFullName(), orderNumber, decision, extra, storefrontUrl));
+    }
+
     static String money(int cents) {
         return "$%d.%02d".formatted(cents / 100, cents % 100);
     }
