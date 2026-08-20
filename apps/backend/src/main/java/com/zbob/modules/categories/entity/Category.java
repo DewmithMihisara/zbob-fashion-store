@@ -24,6 +24,10 @@ public class Category extends BaseEntity {
     @Column(nullable = false)
     private int position;
 
+    /** Written by staff in the dashboard and shown on product pages. Plain text with simple tables. */
+    @Column(name = "size_guide", columnDefinition = "TEXT")
+    private String sizeGuide;
+
     protected Category() {
     }
 
@@ -62,6 +66,14 @@ public class Category extends BaseEntity {
 
     public void setBadge(String badge) {
         this.badge = badge;
+    }
+
+    public String getSizeGuide() {
+        return sizeGuide;
+    }
+
+    public void setSizeGuide(String sizeGuide) {
+        this.sizeGuide = sizeGuide;
     }
 
     public int getPosition() {

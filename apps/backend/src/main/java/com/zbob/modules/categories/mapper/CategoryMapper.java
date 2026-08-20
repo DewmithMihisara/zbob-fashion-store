@@ -9,6 +9,7 @@ public final class CategoryMapper {
     }
 
     public static CategoryResponse toResponse(Category c) {
-        return new CategoryResponse(c.getId(), c.getName(), c.getSlug(), c.getDescription(), c.getBadge(), c.getPosition());
+        return new CategoryResponse(c.getId(), c.getName(), c.getSlug(), c.getDescription(), c.getBadge(), c.getPosition(),
+                c.getSizeGuide());
     }
 }

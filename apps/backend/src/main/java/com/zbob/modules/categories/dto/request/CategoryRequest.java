@@ -7,5 +7,6 @@ public record CategoryRequest(
         @NotBlank @Size(max = 80) String name,
         @Size(max = 500) String description,
         @Size(max = 20) String badge,
-        int position) {
+        int position,
+        @Size(max = 10000) String sizeGuide) {
 }

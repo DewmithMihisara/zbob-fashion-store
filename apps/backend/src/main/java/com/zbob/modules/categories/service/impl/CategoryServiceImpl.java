@@ -99,5 +99,6 @@ public class CategoryServiceImpl implements CategoryService {
         category.setDescription(request.description());
         category.setBadge(request.badge());
         category.setPosition(request.position());
+        category.setSizeGuide(request.sizeGuide() == null || request.sizeGuide().isBlank() ? null : request.sizeGuide());
     }
 }
