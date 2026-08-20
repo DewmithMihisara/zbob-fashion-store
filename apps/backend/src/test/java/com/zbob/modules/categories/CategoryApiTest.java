@@ -75,6 +75,17 @@ class CategoryApiTest {
     }
 
     @Test
+    @WithMockUser(roles = "STAFF")
+    void savesASizeGuideAndShowsItWithTheCategory() throws Exception {
+        mvc.perform(post(ADMIN_URL).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Guide Wear\",\"position\":1,\"sizeGuide\":\"Size | Chest\\nS | 90 cm\"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.sizeGuide").value("Size | Chest\nS | 90 cm"));
+
+        mvc.perform(get("/api/v1/categories")).andExpect(jsonPath("$[?(@.slug == 'guide-wear')].sizeGuide").value("Size | Chest\nS | 90 cm"));
+    }
+
+    @Test
     @WithMockUser(roles = "ADMIN")
     void duplicateNameConflicts() throws Exception {
         categories.save(new Category("Men's Wear", "mens-wear"));
