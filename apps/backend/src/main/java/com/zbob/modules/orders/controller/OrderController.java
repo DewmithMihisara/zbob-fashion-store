@@ -44,6 +44,11 @@ public class OrderController {
         return orders.listForCustomer(user.id(), pageable);
     }
 
+    @PostMapping("/{id}/cancel")
+    OrderResponse cancel(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable Long id) {
+        return orders.cancelByCustomer(user.id(), id);
+    }
+
     @GetMapping("/{id}")
     OrderResponse get(@AuthenticationPrincipal AuthenticatedUser user, @PathVariable Long id) {
         return orders.getForCustomer(user.id(), id);

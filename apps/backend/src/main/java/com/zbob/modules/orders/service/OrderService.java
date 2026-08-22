@@ -205,6 +205,17 @@ public class OrderService {
         return toResponse(find(id));
     }
 
+    /** Before payment the customer can cancel themselves. After that they contact the shop, so refunds are handled properly. */
+    @Transactional
+    public OrderResponse cancelByCustomer(Long userId, Long orderId) {
+        Order order = orders.findByIdAndUserId(orderId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order", orderId));
+        if (order.getStatus() != OrderStatus.PENDING_PAYMENT) {
+            throw new ConflictException("This order can no longer be cancelled online. Please contact us.");
+        }
+        return updateStatus(orderId, OrderStatus.CANCELLED);
+    }
+
     /** Cancelling returns the items to stock. */
     @Transactional
     public OrderResponse updateStatus(Long id, OrderStatus next) {
