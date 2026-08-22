@@ -40,6 +40,10 @@ public class PaymentService {
         return toResponse(payments.save(payment));
     }
 
+    public boolean isAvailable() {
+        return gateway.isPresent();
+    }
+
     @Transactional(readOnly = true)
     public List<PaymentResponse> forOrder(Long orderId) {
         return payments.findByOrderIdOrderByIdDesc(orderId).stream().map(PaymentService::toResponse).toList();
