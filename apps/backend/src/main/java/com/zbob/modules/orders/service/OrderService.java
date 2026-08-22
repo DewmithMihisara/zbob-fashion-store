@@ -27,6 +27,7 @@ import com.zbob.modules.orders.repository.OrderRepository;
 import com.zbob.modules.promotions.service.PromotionService;
 import com.zbob.modules.shipping.entity.ShippingMethod;
 import com.zbob.modules.shipping.repository.ShippingMethodRepository;
+import com.zbob.modules.stockalerts.StockAlertService;
 import com.zbob.modules.users.entity.Role;
 import com.zbob.modules.users.entity.User;
 import com.zbob.modules.users.repository.UserRepository;
@@ -60,10 +61,12 @@ public class OrderService {
     private final PromotionService promotions;
     private final UserRepository users;
     private final EmailService emails;
+    private final StockAlertService stockAlerts;
 
     public OrderService(OrderRepository orders, OrderItemRepository orderItems, CartRepository carts,
             CartItemRepository cartItems, CustomerAddressRepository addresses, ShippingMethodRepository shippingMethods,
-            ProductVariantRepository variants, PromotionService promotions, UserRepository users, EmailService emails) {
+            ProductVariantRepository variants, PromotionService promotions, UserRepository users, EmailService emails,
+            StockAlertService stockAlerts) {
         this.orders = orders;
         this.orderItems = orderItems;
         this.carts = carts;
@@ -74,6 +77,7 @@ public class OrderService {
         this.promotions = promotions;
         this.users = users;
         this.emails = emails;
+        this.stockAlerts = stockAlerts;
     }
 
     @Transactional
@@ -209,11 +213,14 @@ public class OrderService {
             throw new ConflictException("An order that is " + order.getStatus() + " can not become " + next);
         }
         if (next == OrderStatus.CANCELLED) {
+            List<Long> restocked = new ArrayList<>();
             for (OrderItem item : orderItems.findByOrderIdOrderByIdAsc(id)) {
                 if (item.getVariantId() != null) {
                     variants.restoreStock(item.getVariantId(), item.getQuantity());
+                    restocked.add(item.getVariantId());
                 }
             }
+            stockAlerts.notifyIfInStock(restocked);
         }
         order.setStatus(next);
         if (next != OrderStatus.PAID) {

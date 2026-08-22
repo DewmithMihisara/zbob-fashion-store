@@ -15,6 +15,7 @@ import com.zbob.modules.inventory.service.InventoryService;
 import com.zbob.modules.products.entity.Product;
 import com.zbob.modules.products.mapper.ProductMapper;
 import com.zbob.modules.products.repository.ProductRepository;
+import com.zbob.modules.stockalerts.StockAlertService;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -28,9 +29,12 @@ public class InventoryServiceImpl implements InventoryService {
     private final ProductVariantRepository variants;
     private final ProductRepository products;
 
-    public InventoryServiceImpl(ProductVariantRepository variants, ProductRepository products) {
+    private final StockAlertService stockAlerts;
+
+    public InventoryServiceImpl(ProductVariantRepository variants, ProductRepository products, StockAlertService stockAlerts) {
         this.variants = variants;
         this.products = products;
+        this.stockAlerts = stockAlerts;
     }
 
     @Override
@@ -86,6 +90,7 @@ public class InventoryServiceImpl implements InventoryService {
         variant.setStockQuantity(request.stockQuantity());
         variant.setLowStockThreshold(request.lowStockThreshold());
         variant.setColorHex(normalizeHex(request.colorHex()));
+        stockAlerts.notifyIfInStock(List.of(variantId));
         return ProductMapper.toVariant(variant);
     }
 
@@ -94,6 +99,7 @@ public class InventoryServiceImpl implements InventoryService {
     public VariantResponse updateStock(Long variantId, StockUpdateRequest request) {
         ProductVariant variant = find(variantId);
         variant.setStockQuantity(request.stockQuantity());
+        stockAlerts.notifyIfInStock(List.of(variantId));
         return ProductMapper.toVariant(variant);
     }
 
@@ -127,6 +133,7 @@ public class InventoryServiceImpl implements InventoryService {
         for (ProductVariant row : rows) {
             row.setStockQuantity(request.mode() == BulkStockRequest.Mode.SET ? request.amount() : row.getStockQuantity() + request.amount());
         }
+        stockAlerts.notifyIfInStock(ids);
         return rows.size();
     }
 
