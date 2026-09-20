@@ -2,6 +2,8 @@ package com.zbob.modules.orders.repository;
 
 import com.zbob.modules.orders.entity.Order;
 import com.zbob.modules.orders.entity.OrderStatus;
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,4 +20,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     long countByStatus(OrderStatus status);
 
     boolean existsByUserId(Long userId);
+
+    List<Order> findByCreatedAtGreaterThanEqualAndStatusNot(Instant since, OrderStatus status);
 }
