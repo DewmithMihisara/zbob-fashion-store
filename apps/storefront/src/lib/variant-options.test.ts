@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { chooseSize, colors, firstAvailable, sortedSizes } from "./variant-options";
 
-const option = (variantId: number, size: string, color: string, inStock = true) => ({ variantId, size, color, inStock });
+const option = (variantId: number, size: string, color: string, inStock = true) => ({ variantId, size, color, inStock, colorHex: null });
 
 describe("sortedSizes", () => {
   it("orders clothing sizes naturally and removes duplicates", () => {

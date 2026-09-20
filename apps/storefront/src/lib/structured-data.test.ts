@@ -14,7 +14,7 @@ const product: PublicProduct = {
   priceCents: 3550,
   compareAtPriceCents: null,
   inStock: false,
-  category: { id: 1, name: "Men's Wear", slug: "mens-wear", description: null, badge: null, position: 0 },
+  category: { id: 1, name: "Men's Wear", slug: "mens-wear", description: null, badge: null, position: 0, sizeGuide: null },
   images: [{ id: 1, url: "https://cdn.example/a.png", altText: null, position: 0 }],
   options: [],
 };

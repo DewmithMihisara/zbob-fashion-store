@@ -7,6 +7,7 @@ export interface Category {
   description: string | null;
   badge: string | null;
   position: number;
+  sizeGuide: string | null;
 }
 
 export interface CategoryWithPrices {
@@ -40,6 +41,7 @@ export interface ProductVariant {
   stockQuantity: number;
   lowStockThreshold: number;
   lowStock: boolean;
+  colorHex: string | null;
 }
 
 /** Compact shape used on product cards. */
@@ -62,6 +64,7 @@ export interface PublicVariantOption {
   size: string;
   color: string;
   inStock: boolean;
+  colorHex: string | null;
 }
 
 /** Storefront product page. Reports only whether it is in stock. */
@@ -100,4 +103,5 @@ export interface InventoryRow {
   stockQuantity: number;
   lowStockThreshold: number;
   lowStock: boolean;
+  colorHex: string | null;
 }

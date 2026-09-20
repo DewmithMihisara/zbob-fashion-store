@@ -10,9 +10,9 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 vi.mock("@/components/cart/CartProvider", () => ({ useCart: () => ({ addItem }) }));
 
 const options = [
-  { variantId: 1, size: "S", color: "Black", inStock: false },
-  { variantId: 2, size: "M", color: "Black", inStock: true },
-  { variantId: 3, size: "L", color: "Black", inStock: true },
+  { variantId: 1, size: "S", color: "Black", inStock: false, colorHex: null },
+  { variantId: 2, size: "M", color: "Black", inStock: true, colorHex: null },
+  { variantId: 3, size: "L", color: "Black", inStock: true, colorHex: null },
 ];
 
 beforeEach(() => {
