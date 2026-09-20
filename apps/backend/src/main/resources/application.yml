@@ -43,6 +43,8 @@ app:
     provider: ${MAIL_PROVIDER:log}
     from: ${MAIL_FROM:zbob <hello@zbob.example>}
     storefront-url: ${STOREFRONT_URL:http://localhost:3000}
+  reports:
+    time-zone: ${REPORT_TIME_ZONE:UTC}
   returns:
     window-days: ${RETURN_WINDOW_DAYS:30}
   admin:
