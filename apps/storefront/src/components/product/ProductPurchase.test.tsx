@@ -10,9 +10,9 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 vi.mock("@/components/cart/CartProvider", () => ({ useCart: () => ({ addItem }) }));
 
 const options = [
-  { variantId: 1, size: "S", color: "Black", inStock: false, colorHex: null },
-  { variantId: 2, size: "M", color: "Black", inStock: true, colorHex: null },
-  { variantId: 3, size: "L", color: "Black", inStock: true, colorHex: null },
+  { variantId: 1, size: "S", color: "Black", inStock: false, colorHex: "#000000" },
+  { variantId: 2, size: "M", color: "Black", inStock: true, colorHex: "#000000" },
+  { variantId: 3, size: "L", color: "Black", inStock: true, colorHex: "#000000" },
 ];
 
 beforeEach(() => {
@@ -24,11 +24,21 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("ProductPurchase", () => {
-  it("starts on the first size in stock and disables sold out sizes", () => {
+  it("starts on the first size in stock and marks sold out sizes", () => {
     render(<ProductPurchase slug="tee" options={options} />);
 
     expect(screen.getByRole("button", { name: "M" }).getAttribute("aria-pressed")).toBe("true");
-    expect((screen.getByRole("button", { name: "S" }) as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByRole("button", { name: "S, sold out" })).toBeTruthy();
+  });
+
+  it("offers a back in stock email instead of buying when a sold out size is picked", () => {
+    render(<ProductPurchase slug="tee" options={options} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "S, sold out" }));
+
+    expect(screen.getByText("S in Black is sold out. Email me when it is back:")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Add to cart" })).toBeNull();
+    expect((screen.getByRole("button", { name: "Out of stock" }) as HTMLButtonElement).disabled).toBe(true);
   });
 
   it("sends signed out shoppers to sign in and back, without adding", () => {
@@ -50,6 +60,24 @@ describe("ProductPurchase", () => {
 
     await waitFor(() => expect(screen.getByRole("status").textContent).toContain("Added to your cart"));
     expect(addItem).toHaveBeenCalledWith(3, 1);
+  });
+
+  it("order now opens checkout for the chosen size", () => {
+    setCustomerSession({ token: "abc", fullName: "Sam" });
+    render(<ProductPurchase slug="tee" options={options} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "L" }));
+    fireEvent.click(screen.getByRole("button", { name: "Order Now" }));
+
+    expect(push).toHaveBeenCalledWith("/checkout?variant=3&qty=1");
+  });
+
+  it("order now asks signed out shoppers to sign in first, then returns to checkout", () => {
+    render(<ProductPurchase slug="tee" options={options} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Order Now" }));
+
+    expect(push).toHaveBeenCalledWith(`/login?next=${encodeURIComponent("/checkout?variant=2&qty=1")}`);
   });
 
   it("shows why adding failed", async () => {

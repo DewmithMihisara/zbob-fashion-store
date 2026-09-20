@@ -8,34 +8,61 @@ import { useCart } from "@/components/cart/CartProvider";
 import { ErrorNotice } from "@/components/ui/FormField";
 import { useCustomerAction } from "@/hooks/useCustomerAction";
 import { useCustomerSession } from "@/hooks/useCustomerSession";
-import { chooseSize, colors, find, firstAvailable, sortedSizes } from "@/lib/variant-options";
+import { colors, find, firstAvailable, sortedSizes } from "@/lib/variant-options";
+import { BackInStockForm } from "./BackInStockForm";
+import { ColourSwatch } from "./ColourSwatch";
+import { OrderNowButton } from "./OrderNowButton";
 
-function OptionPill({ label, active, disabled, onClick }: { label: string; active: boolean; disabled: boolean; onClick: () => void }) {
+function OptionPill({
+  label,
+  active,
+  soldOut,
+  disabled = false,
+  swatch,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  soldOut: boolean;
+  disabled?: boolean;
+  swatch?: string | null;
+  onClick: () => void;
+}) {
   return (
     <button
       type="button"
       aria-pressed={active}
+      aria-label={soldOut ? `${label}, sold out` : label}
       disabled={disabled}
       onClick={onClick}
-      className={`min-w-11 rounded-full px-[14px] py-[9px] text-[15px] font-medium transition-colors ${
+      className={`inline-flex min-w-11 items-center justify-center gap-2 rounded-full px-[14px] py-[9px] text-[15px] font-medium transition-colors ${
         active ? "bg-ink text-paper" : "bg-paper text-ink hover:bg-tile"
-      } disabled:cursor-not-allowed disabled:bg-transparent disabled:text-faint disabled:line-through`}
+      } ${soldOut && !active ? "text-faint line-through" : ""} disabled:cursor-not-allowed disabled:opacity-40`}
     >
+      <ColourSwatch hex={swatch ?? null} />
       {label}
     </button>
   );
 }
 
+/** Size and colour picker, with Add to cart and Order Now. Sold out choices offer a back in stock email instead. */
 export function ProductPurchase({ slug, options }: { slug: string; options: PublicVariantOption[] }) {
   const router = useRouter();
   const session = useCustomerSession();
   const { addItem } = useCart();
-  const [selected, setSelected] = useState(() => firstAvailable(options));
+  const [selected, setSelected] = useState(() => firstAvailable(options) ?? options[0]);
   const [added, setAdded] = useState(false);
   const { run, busy, error } = useCustomerAction();
 
-  function choose(option: PublicVariantOption | undefined) {
+  function chooseSize(size: string) {
     setAdded(false);
+    const sameColour = selected ? find(options, size, selected.color) : undefined;
+    setSelected(sameColour?.inStock ? sameColour : (options.find((o) => o.size === size && o.inStock) ?? sameColour ?? options.find((o) => o.size === size)));
+  }
+
+  function chooseColour(color: string) {
+    setAdded(false);
+    const option = selected ? find(options, selected.size, color) : undefined;
     if (option) {
       setSelected(option);
     }
@@ -51,6 +78,16 @@ export function ProductPurchase({ slug, options }: { slug: string; options: Publ
     }
   }
 
+  function orderNow() {
+    if (!selected) {
+      return;
+    }
+    const checkout = `/checkout?variant=${selected.variantId}&qty=1`;
+    router.push(session ? checkout : `/login?next=${encodeURIComponent(checkout)}`);
+  }
+
+  const available = Boolean(selected?.inStock);
+
   return (
     <div className="flex flex-col gap-3">
       <div role="group" aria-label="Size">
@@ -61,8 +98,8 @@ export function ProductPurchase({ slug, options }: { slug: string; options: Publ
               key={size}
               label={size}
               active={selected?.size === size}
-              disabled={!options.some((o) => o.size === size && o.inStock)}
-              onClick={() => choose(chooseSize(options, size, selected?.color))}
+              soldOut={!options.some((o) => o.size === size && o.inStock)}
+              onClick={() => chooseSize(size)}
             />
           ))}
         </div>
@@ -70,34 +107,46 @@ export function ProductPurchase({ slug, options }: { slug: string; options: Publ
       <div role="group" aria-label="Colour">
         <p className="mb-2 text-[15px] font-medium text-muted">Colour</p>
         <div className="flex flex-wrap gap-2">
-          {colors(options).map((color) => (
-            <OptionPill
-              key={color}
-              label={color}
-              active={selected?.color === color}
-              disabled={!selected || !find(options, selected.size, color)?.inStock}
-              onClick={() => choose(selected && find(options, selected.size, color))}
-            />
-          ))}
+          {colors(options).map((color) => {
+            const option = selected ? find(options, selected.size, color) : undefined;
+            return (
+              <OptionPill
+                key={color}
+                label={color}
+                swatch={options.find((o) => o.color === color)?.colorHex}
+                active={selected?.color === color}
+                soldOut={!option?.inStock}
+                disabled={!option}
+                onClick={() => chooseColour(color)}
+              />
+            );
+          })}
         </div>
       </div>
       <ErrorNotice message={error} />
-      <button
-        type="button"
-        disabled={busy || !selected}
-        onClick={add}
-        className="h-[54px] w-full rounded-full bg-paper text-[18px] font-medium tracking-tight-2 text-ink transition-transform enabled:hover:scale-[1.01] enabled:active:scale-[0.99] disabled:opacity-60"
-      >
-        {busy ? "Adding..." : "Add to cart"}
-      </button>
-      {added && (
-        <p role="status" className="text-center text-[15px] text-muted">
-          Added to your cart.{" "}
-          <Link href="/cart" className="text-ink underline">
-            View cart
-          </Link>
-        </p>
+      {available ? (
+        <>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={add}
+            className="h-[54px] w-full rounded-full bg-paper text-[18px] font-medium tracking-tight-2 text-ink transition-transform enabled:hover:scale-[1.01] enabled:active:scale-[0.99] disabled:opacity-60"
+          >
+            {busy ? "Adding..." : "Add to cart"}
+          </button>
+          {added && (
+            <p role="status" className="text-center text-[15px] text-muted">
+              Added to your cart.{" "}
+              <Link href="/cart" className="text-ink underline">
+                View cart
+              </Link>
+            </p>
+          )}
+        </>
+      ) : (
+        selected && <BackInStockForm key={selected.variantId} variantId={selected.variantId} label={`${selected.size} in ${selected.color}`} />
       )}
+      <OrderNowButton disabled={!available} onOrder={orderNow} />
     </div>
   );
 }
