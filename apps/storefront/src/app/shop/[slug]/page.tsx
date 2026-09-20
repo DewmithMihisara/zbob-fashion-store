@@ -6,6 +6,7 @@ import { OrderNowButton } from "@/components/product/OrderNowButton";
 import { Price } from "@/components/product/Price";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import { ProductPurchase } from "@/components/product/ProductPurchase";
+import { SizeGuide } from "@/components/product/SizeGuide";
 import { TrustGrid } from "@/components/product/TrustGrid";
 import { ProductReviewsSection } from "@/components/reviews/ProductReviewsSection";
 import { WishlistButton } from "@/components/wishlist/WishlistButton";
@@ -73,8 +74,16 @@ export default async function ProductPage({ params }: Props) {
               </div>
               <p className="mt-10 max-w-[440px] text-[18px] leading-[27px] font-medium text-muted">{product.description}</p>
               <div className="mt-5 flex flex-col gap-3">
-                {product.inStock && <ProductPurchase slug={product.slug} options={product.options} />}
-                <OrderNowButton disabled={!product.inStock} />
+                {product.category.sizeGuide && (
+                  <div className="-mb-1 flex justify-end">
+                    <SizeGuide guide={product.category.sizeGuide} />
+                  </div>
+                )}
+                {product.options.length > 0 ? (
+                  <ProductPurchase slug={product.slug} options={product.options} />
+                ) : (
+                  <OrderNowButton disabled />
+                )}
               </div>
               <dl className="mt-auto pt-[58px]">
                 {details.map(({ icon: DetailIcon, label, value }, index) => (
