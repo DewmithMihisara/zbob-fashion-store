@@ -64,6 +64,12 @@ To send real email through any SMTP service, such as Amazon SES, SendGrid, Mailg
 
 The store sends: a welcome email, password reset links (valid for one hour), a notice when a password changes, and order placed, shipped, delivered and cancelled updates.
 
+## Returns and reports
+
+`RETURN_WINDOW_DAYS` (default 30) sets how long after delivery customers can ask for a return. Match it to your returns policy. The window starts when staff mark the order delivered.
+
+`REPORT_TIME_ZONE` (default `UTC`) decides which day an order counts towards in the sales charts. For Sri Lanka use `Asia/Colombo`.
+
 ## Rate limits
 
 The API limits failed sign ins (5 per email and 50 per address every 15 minutes), sign ups (10 per address an hour), password reset requests, and the contact and newsletter forms. Over a limit it answers `429` with a `Retry-After` header. Each limit can be changed with an environment variable, such as `APP_RATELIMIT_LOGINPEREMAIL`.

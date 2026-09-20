@@ -26,6 +26,7 @@ Every error has the same shape:
 | GET | `/site-media` | Slot name to photo URL |
 | GET | `/shipping-methods` | Active delivery options |
 | POST | `/contact`, `/newsletter` | Contact form and newsletter signup |
+| POST | `/stock-alerts` | Ask to be emailed once when a sold out size is back |
 | POST | `/auth/customer/register`, `/auth/customer/login`, `/auth/admin/login` | Accounts and sign in |
 
 ## Customer (role `CUSTOMER`)
@@ -38,6 +39,9 @@ Every error has the same shape:
 | GET, POST, PATCH, DELETE | `/cart`, `/cart/items` | Cart |
 | GET, POST | `/orders` | Place and list own orders |
 | POST | `/orders/{id}/payments` | Returns `501` until a gateway is added |
+| POST | `/checkout/quote` | Prices the cart, or one item with `buyNow`, with delivery and promo code. Saves nothing |
+| POST | `/orders/{id}/cancel` | Cancel an order that is not paid yet |
+| GET, POST | `/orders/{id}/returns` | Ask to return a delivered order, and see the answer |
 | POST | `/reviews` | Submit a review for approval, one per product |
 | GET, PUT, DELETE | `/me/wishlist`, `/me/wishlist/ids`, `/me/wishlist/{productId}` | Saved products |
 
@@ -60,4 +64,6 @@ Every list here is paged on the server: use `page` (from 0), `size` (up to 100) 
 | `/inventory/bulk` | Set or adjust stock for up to 200 rows at once, all or nothing |
 | `/exports/{products,inventory,customers,orders,subscribers}.csv` | CSV downloads. Customers, orders and subscribers need `ADMIN` |
 | `/activity` | Who changed what in the dashboard, and dashboard sign ins. Needs `ADMIN` |
+| `/reports/sales?days=` | Orders, revenue, best sellers and stock health for a period |
+| `/returns`, `/returns/{id}` | Return requests. Approve, decline, then mark completed |
 | `/customers/{id}/password-reset` | Email a customer a reset link |
