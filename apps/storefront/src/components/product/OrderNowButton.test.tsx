@@ -6,23 +6,20 @@ afterEach(cleanup);
 
 describe("OrderNowButton", () => {
   it("is a plain button that is not inside a link or form", () => {
-    render(<OrderNowButton />);
+    render(<OrderNowButton onOrder={vi.fn()} />);
     const button = screen.getByRole("button", { name: "Order Now" });
     expect(button.getAttribute("type")).toBe("button");
     expect(button.closest("a")).toBeNull();
     expect(button.closest("form")).toBeNull();
   });
 
-  it("makes no request and does not navigate when clicked", () => {
-    const fetchSpy = vi.spyOn(globalThis, "fetch");
-    const startUrl = window.location.href;
-    render(<OrderNowButton />);
+  it("hands the order to its owner when clicked", () => {
+    const onOrder = vi.fn();
+    render(<OrderNowButton onOrder={onOrder} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Order Now" }));
 
-    expect(fetchSpy).not.toHaveBeenCalled();
-    expect(window.location.href).toBe(startUrl);
-    fetchSpy.mockRestore();
+    expect(onOrder).toHaveBeenCalledTimes(1);
   });
 
   it("shows out of stock and is disabled when nothing is available", () => {
