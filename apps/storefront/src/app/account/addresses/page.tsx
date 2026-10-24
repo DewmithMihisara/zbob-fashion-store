@@ -6,7 +6,9 @@ import { buttonClass } from "@/components/ui/Button";
 import { ErrorNotice, FormField } from "@/components/ui/FormField";
 import { useCustomerAction } from "@/hooks/useCustomerAction";
 import { useCustomerData } from "@/hooks/useCustomerData";
+import { useRouter, useSearchParams } from "next/navigation";
 import { customerApi } from "@/lib/customer-api";
+import { safeNext } from "@/lib/safe-next";
 
 function AddressForm({ address, onDone, onCancel }: { address: CustomerAddress | null; onDone: () => void; onCancel: () => void }) {
   const [recipient, setRecipient] = useState(address?.recipient ?? "");
@@ -71,9 +73,16 @@ export default function AddressesPage() {
   const { data, error, reload } = useCustomerData<CustomerAddress[]>("/me/addresses");
   const [editing, setEditing] = useState<CustomerAddress | "new" | null>(null);
   const remove = useCustomerAction();
+  const router = useRouter();
+
+  const returnTo = safeNext(useSearchParams().get("next"), "");
 
   function done() {
     setEditing(null);
+    if (returnTo) {
+      router.push(returnTo);
+      return;
+    }
     reload();
   }
 

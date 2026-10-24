@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, type ReactNode } from "react";
+import { Suspense, useEffect, type ReactNode } from "react";
 import { Container, Heading } from "@/components/ui/SectionHeading";
 import { useCustomerSession, useIsClient } from "@/hooks/useCustomerSession";
 import { clearCustomerSession } from "@/lib/customer-session";
@@ -55,7 +55,7 @@ export function AccountShell({ children }: { children: ReactNode }) {
             );
           })}
         </nav>
-        {children}
+        <Suspense>{children}</Suspense>
       </Container>
     </section>
   );
