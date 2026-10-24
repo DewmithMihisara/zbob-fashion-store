@@ -97,6 +97,17 @@ export interface ContactMessage {
   receivedAt: string;
 }
 
+export interface SalesReport {
+  days: number;
+  timeZone: string;
+  orders: number;
+  revenueCents: number;
+  averageOrderCents: number;
+  daily: { date: string; orders: number; revenueCents: number }[];
+  bestSellers: { productName: string; units: number; revenueCents: number }[];
+  stock: { inStock: number; low: number; out: number };
+}
+
 export interface ActivityEntry {
   id: number;
   actor: string;
