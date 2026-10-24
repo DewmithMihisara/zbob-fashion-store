@@ -17,6 +17,7 @@ export const navigation: NavGroup[] = [
     title: "Overview",
     items: [
       { href: "/dashboard", label: "Dashboard" },
+      { href: "/reports", label: "Reports" },
       { href: "/activity", label: "Activity", roles: ["ADMIN"] },
     ],
   },
@@ -41,6 +42,7 @@ export const navigation: NavGroup[] = [
     title: "Sales",
     items: [
       { href: "/orders", label: "Orders" },
+      { href: "/returns", label: "Returns" },
       { href: "/promotions", label: "Promotions" },
       { href: "/shipping", label: "Shipping" },
     ],
