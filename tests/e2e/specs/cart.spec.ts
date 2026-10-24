@@ -93,21 +93,16 @@ test("you can not add more than is in stock", async ({ page, request }) => {
   await expect(page.getByTestId("form-error")).toHaveText("Only 1 left in stock");
 });
 
-test("checkout stays unavailable and Order Now stays inert when signed in", async ({ page }) => {
-  await registerInBrowser(page, uniqueEmail("inert"));
+test("the cart's checkout button opens checkout with every cart item", async ({ page }) => {
+  await registerInBrowser(page, uniqueEmail("cartcheckout"));
   await page.goto(`${STORE}/shop/${SLUG}`);
   await page.getByRole("button", { name: "Add to cart" }).click();
   await expect(page.getByRole("link", { name: "Cart, 1 item" })).toBeVisible();
-  await page.waitForLoadState("networkidle");
-
-  const urlBefore = page.url();
-  const requests: string[] = [];
-  page.on("request", (r) => requests.push(r.url()));
-  await page.getByRole("button", { name: "Order Now" }).click();
-  await page.waitForTimeout(1000);
-  expect(page.url()).toBe(urlBefore);
-  expect(requests.filter((url) => !url.includes("_next"))).toEqual([]);
 
   await page.goto(`${STORE}/cart`);
-  await expect(page.getByRole("button", { name: "Checkout coming soon" })).toBeDisabled();
+  await page.getByRole("link", { name: "Checkout", exact: true }).click();
+
+  await expect(page).toHaveURL(/\/checkout$/);
+  await expect(page.getByRole("complementary", { name: "Order summary" })).toContainText(PRODUCT);
+  await expect(page.getByRole("button", { name: "Payment coming soon" })).toBeDisabled();
 });
