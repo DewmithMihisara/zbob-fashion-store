@@ -13,6 +13,13 @@
   --color-accent: #ff6a00;
   --color-danger: #c81e1e;
   --color-success: #15803d;
+
+  /* Charts: one series colour and the fixed status set, validated against the white chart surface. */
+  --color-series-1: #2a78d6;
+  --color-status-good: #0ca30c;
+  --color-status-warning: #fab219;
+  --color-status-critical: #d03b3b;
+  --color-grid: #ececea;
 }
 
 @layer base {
