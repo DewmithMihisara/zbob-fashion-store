@@ -4,13 +4,14 @@ import type { OrderDetail } from "@zbob/shared-types";
 import { formatPrice } from "@zbob/shared-utils";
 import Link from "next/link";
 import { use } from "react";
+import { OrderActions } from "@/components/account/OrderActions";
 import { orderStatusLabels } from "@/components/account/order-status";
 import { ErrorNotice } from "@/components/ui/FormField";
 import { useCustomerData } from "@/hooks/useCustomerData";
 
 export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { data: order, error } = useCustomerData<OrderDetail>(`/orders/${encodeURIComponent(id)}`);
+  const { data: order, error, reload } = useCustomerData<OrderDetail>(`/orders/${encodeURIComponent(id)}`);
 
   return (
     <div className="flex flex-col gap-4">
@@ -70,6 +71,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
               </p>
             </section>
           </div>
+          <OrderActions order={order} onChanged={reload} />
         </>
       )}
     </div>
