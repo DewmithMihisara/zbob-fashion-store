@@ -107,17 +107,16 @@ export function CartView() {
           </span>
         </p>
         <p className="mt-1 text-[14px] text-muted">Delivery and any discounts are worked out at checkout.</p>
-        {/* No payment gateway has been chosen yet. Connect checkout here when one is. */}
-        <button type="button" disabled className="mt-5 h-12 w-full rounded-full bg-faint text-[17px] font-medium text-paper">
-          Checkout coming soon
-        </button>
-        <p className="mt-3 text-center text-[14px] text-muted">
-          Online payment is not open yet.{" "}
-          <Link href="/contact" className="text-ink underline">
-            Contact us
-          </Link>{" "}
-          to order.
-        </p>
+        <Link
+          href="/checkout"
+          aria-disabled={cart.items.some((item) => !item.available)}
+          className="mt-5 flex h-12 w-full items-center justify-center rounded-full bg-ink text-[17px] font-medium text-paper aria-disabled:pointer-events-none aria-disabled:bg-faint"
+        >
+          Checkout
+        </Link>
+        {cart.items.some((item) => !item.available) && (
+          <p className="mt-3 text-center text-[14px] text-red-700">Fix the items marked above to continue.</p>
+        )}
       </aside>
     </div>
   );
