@@ -20,11 +20,12 @@ function CategoryForm({ category, onDone }: { category: Category | null; onDone:
   const [description, setDescription] = useState(category?.description ?? "");
   const [badge, setBadge] = useState(category?.badge ?? "");
   const [position, setPosition] = useState(String(category?.position ?? 0));
+  const [sizeGuide, setSizeGuide] = useState(category?.sizeGuide ?? "");
   const { run, busy, error, fieldErrors } = useAction();
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    const json = { name, description: description || null, badge: badge || null, position: Number(position) };
+    const json = { name, description: description || null, badge: badge || null, position: Number(position), sizeGuide: sizeGuide || null };
     const ok = await run(() =>
       category
         ? api(`/admin/categories/${category.id}`, { method: "PUT", json })
@@ -40,6 +41,15 @@ function CategoryForm({ category, onDone }: { category: Category | null; onDone:
       <ErrorAlert message={error} />
       <TextField label="Name" required maxLength={80} value={name} onChange={(e) => setName(e.target.value)} error={fieldErrors.name} />
       <TextArea label="Description" rows={3} maxLength={500} hint="Shown on the home page collection card." value={description} onChange={(e) => setDescription(e.target.value)} />
+      <TextArea
+        label="Size guide"
+        rows={6}
+        maxLength={10000}
+        placeholder={"Size | Chest | Length\nS | 92 cm | 68 cm"}
+        hint="Shown on this category's product pages. Put | between columns to make a table; other lines show as notes. Leave empty to hide it."
+        value={sizeGuide}
+        onChange={(e) => setSizeGuide(e.target.value)}
+      />
       <TextField label="Badge" maxLength={20} placeholder="New" value={badge} onChange={(e) => setBadge(e.target.value)} />
       <TextField label="Order" type="number" hint="Lower numbers show first. The first three appear on the home page." value={position} onChange={(e) => setPosition(e.target.value)} />
       <Button type="submit" disabled={busy}>
