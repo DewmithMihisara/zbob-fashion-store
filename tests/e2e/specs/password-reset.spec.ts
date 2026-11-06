@@ -27,6 +27,8 @@ test("forgot password sends a link that sets a new password once", async ({ page
   await page.getByRole("button", { name: "Sign out" }).click();
 
   await page.getByRole("link", { name: "Forgot your password?" }).click();
+  // The sign in form has an Email field too, so wait until the new page has replaced it.
+  await expect(page.getByRole("heading", { name: "Forgot your password?" })).toBeVisible();
   await page.getByRole("main").getByLabel("Email").fill(email);
   await page.getByRole("button", { name: "Send reset link" }).click();
   await expect(page.getByRole("heading", { name: "Check your email" })).toBeVisible();
