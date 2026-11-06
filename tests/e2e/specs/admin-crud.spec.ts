@@ -108,7 +108,7 @@ test("stock page: add, edit and delete a row", async ({ page }) => {
   await dialog(page).getByLabel("Product").selectOption({ label: "Everyday Square Tee" });
   await dialog(page).getByLabel("SKU").fill(`SKU-${id}`);
   await dialog(page).getByLabel("Size").fill("XXL");
-  await dialog(page).getByLabel("Colour").fill(`Tone ${id}`);
+  await dialog(page).getByLabel("Colour", { exact: true }).fill(`Tone ${id}`);
   await dialog(page).getByLabel("In stock").fill("3");
   await dialog(page).getByRole("button", { name: "Save" }).click();
   await expect(dialog(page)).toHaveCount(0);
