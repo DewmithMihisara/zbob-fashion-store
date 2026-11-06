@@ -11,6 +11,7 @@ import com.zbob.modules.promotions.entity.Promotion;
 import com.zbob.modules.promotions.repository.PromotionRepository;
 import java.time.Instant;
 import java.util.Locale;
+import java.util.OptionalInt;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,13 +58,24 @@ public class PromotionService {
         promotions.delete(find(id));
     }
 
+    public static final String NOT_USABLE = "This promotion code can not be used on this order";
+
     /** Discount in cents for an order, or an error explaining why the code can not be used. */
     @Transactional(readOnly = true)
     public int discountFor(String code, int subtotalCents) {
-        Promotion promotion = promotions.findByCodeIgnoreCase(code)
+        return findDiscount(code, subtotalCents).orElseThrow(() -> new BadRequestException(NOT_USABLE));
+    }
+
+    /**
+     * The discount when the code can be used, or empty. Callers that only want to show a message use this,
+     * because an exception thrown inside a transaction marks the caller's whole transaction to roll back.
+     */
+    @Transactional(readOnly = true)
+    public OptionalInt findDiscount(String code, int subtotalCents) {
+        return promotions.findByCodeIgnoreCase(code)
                 .filter(p -> p.isUsableAt(Instant.now(), subtotalCents))
-                .orElseThrow(() -> new BadRequestException("This promotion code can not be used on this order"));
-        return promotion.discountOn(subtotalCents);
+                .map(p -> OptionalInt.of(p.discountOn(subtotalCents)))
+                .orElse(OptionalInt.empty());
     }
 
     private Promotion find(Long id) {

@@ -77,11 +77,12 @@ public class CheckoutService {
         String code = null;
         String promotionError = null;
         if (StringUtils.hasText(request.promotionCode())) {
-            try {
-                discount = promotions.discountFor(request.promotionCode().trim(), subtotal);
+            var found = promotions.findDiscount(request.promotionCode().trim(), subtotal);
+            if (found.isPresent()) {
+                discount = found.getAsInt();
                 code = request.promotionCode().trim().toUpperCase(Locale.ROOT);
-            } catch (BadRequestException e) {
-                promotionError = e.getMessage();
+            } else {
+                promotionError = PromotionService.NOT_USABLE;
             }
         }
 
