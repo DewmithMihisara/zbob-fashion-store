@@ -11,6 +11,12 @@ describe("niceTicks", () => {
     expect(niceTicks(0)).toEqual([0, 1]);
   });
 
+  it("keeps counts to whole numbers", () => {
+    expect(niceTicks(2, 4, true)).toEqual([0, 1, 2]);
+    expect(niceTicks(9, 4, true)).toEqual([0, 5, 10]);
+    expect(niceTicks(0, 4, true)).toEqual([0, 1]);
+  });
+
   it("ends exactly on a value that is already round", () => {
     expect(niceTicks(400)).toEqual([0, 100, 200, 300, 400]);
   });

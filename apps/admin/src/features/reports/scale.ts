@@ -1,11 +1,15 @@
 /** Round tick values from zero up past the largest value, e.g. 0, 2,000, 4,000, 6,000. */
-export function niceTicks(max: number, count = 4): number[] {
+export function niceTicks(max: number, count = 4, integer = false): number[] {
   if (max <= 0) {
     return [0, 1];
   }
   const rough = max / count;
   const magnitude = 10 ** Math.floor(Math.log10(rough));
-  const step = [1, 2, 2.5, 5, 10].map((m) => m * magnitude).find((s) => s >= rough)!;
+  const candidates = [1, 2, 2.5, 5, 10].map((m) => m * magnitude);
+  // Counts such as orders can not be fractional, so their steps never go below 1 or land on halves.
+  const step = integer
+    ? Math.max(1, candidates.filter(Number.isInteger).find((s) => s >= rough) ?? Math.ceil(rough))
+    : candidates.find((s) => s >= rough)!;
   const ticks: number[] = [];
   for (let value = 0; value < max + step; value += step) {
     ticks.push(Math.round(value * 1e6) / 1e6);

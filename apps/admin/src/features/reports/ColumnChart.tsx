@@ -20,15 +20,18 @@ export function ColumnChart({
   format,
   tickFormat,
   label,
+  integer = false,
 }: {
   columns: Column[];
   format: (value: number) => string;
   tickFormat: (value: number) => string;
   label: string;
+  /** Whole number ticks, for counts. */
+  integer?: boolean;
 }) {
   const { ref, width } = useWidth<HTMLDivElement>();
   const [hover, setHover] = useState<number | null>(null);
-  const ticks = niceTicks(Math.max(0, ...columns.map((c) => c.value)));
+  const ticks = niceTicks(Math.max(0, ...columns.map((c) => c.value)), 4, integer);
   const top = ticks[ticks.length - 1]!;
   const plotWidth = Math.max(0, width - PAD.left - PAD.right);
   const plotHeight = HEIGHT - PAD.top - PAD.bottom;

@@ -93,6 +93,7 @@ export default function ReportsPage() {
                   columns={daily.map((d) => ({ key: d.date, label: dayLabel(d.date), value: d.orders }))}
                   format={(v) => `${v} ${v === 1 ? "order" : "orders"}`}
                   tickFormat={compactNumber}
+                  integer
                 />
               </Panel>
             </div>
