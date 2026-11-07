@@ -1,0 +1,5 @@
+packages:
+  - "apps/storefront"
+  - "apps/admin"
+  - "packages/*"
+  - "tests/e2e"

@@ -1,0 +1,17 @@
+{
+  "name": "zbob",
+  "private": true,
+  "packageManager": "pnpm@12.18.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev:storefront": "pnpm --filter @zbob/storefront dev",
+    "dev:admin": "pnpm --filter @zbob/admin dev",
+    "dev:backend": "node apps/backend/run-dev.mjs",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test"
+  }
+}

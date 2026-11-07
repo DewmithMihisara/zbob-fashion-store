@@ -1,0 +1,70 @@
+# Runs everything locally. Run from the repository root with the variables below set,
+# for example in a .env file beside this one:
+#   docker compose -f infrastructure/docker-compose.yml up --build
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: zbob
+      MYSQL_USER: zbob
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uzbob -p$$MYSQL_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build:
+      context: ..
+      dockerfile: infrastructure/docker/backend.Dockerfile
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_HOST: mysql
+      DB_NAME: zbob
+      DB_USERNAME: zbob
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET to at least 32 characters}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?Set ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD}
+      CORS_ALLOWED_ORIGINS: http://localhost:3000,http://localhost:3001
+      STORAGE_PROVIDER: local
+      STORAGE_LOCAL_DIR: /data/uploads
+      STORAGE_PUBLIC_BASE_URL: http://localhost:8080/uploads
+    volumes:
+      - uploads:/data/uploads
+    ports:
+      - "8080:8080"
+
+  storefront:
+    build:
+      context: ..
+      dockerfile: infrastructure/docker/storefront.Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8080/api/v1
+    depends_on:
+      - backend
+    environment:
+      API_URL: http://backend:8080/api/v1
+    ports:
+      - "3000:3000"
+
+  admin:
+    build:
+      context: ..
+      dockerfile: infrastructure/docker/admin.Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8080/api/v1
+    depends_on:
+      - backend
+    ports:
+      - "3001:3001"
+
+volumes:
+  mysql-data:
+  uploads:
